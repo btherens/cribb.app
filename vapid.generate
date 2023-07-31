@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# generate new vapid key and create public / private keypair
+# generate new key
+openssl ecparam -genkey -name prime256v1 -out vapidkey.pem;
+# output base64 encoded public / private keys
+openssl ec -in vapidkey.pem -pubout -outform DER|tail    -c 65|base64|tr -d '=' |tr '/+' '_-' > vapid.public.key;
+openssl ec -in vapidkey.pem -outform DER|tail -c +8|head -c 32|base64|tr -d '=' |tr '/+' '_-' > vapid.private.key;

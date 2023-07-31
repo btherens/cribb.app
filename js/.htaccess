@@ -1,0 +1,3 @@
+<Files "service.js">
+    Header Set Service-Worker-allowed "/"
+</Files>

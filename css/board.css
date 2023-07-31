@@ -1,0 +1,100 @@
+
+/* board elements */
+/* boardnum - numbered icons on board */
+.boardnum {
+    /* width of text */
+    --boardnum-width: 1.8em;
+    /* text size */
+    font-size: 1em;
+    /* center text inside boardnum div */
+    text-align: center;
+    /* numbers color */
+    color: var(--pegholecolor);
+}
+/* block of pegholes */
+.boardblock {
+    /* width of boardblock derived with --peghole dimensions */
+    --boardblock-width: calc((var(--peghole-diameter) * 5) + (var(--peghole-spacing) * 10));
+}
+/* peghole - pegholes that make up a boardblock */
+.boardblock > .peghole {
+    height: var(--peghole-diameter);
+    width: var(--peghole-diameter);
+    /* render div as circle */
+    border-radius: 50%;
+    /* limit peg element to dimensions of peghole */
+    /* overflow: hidden; */
+    background-color: var(--pegholecolor);
+    /* justify pegholes to left */
+    float: left;
+}
+/* peg - a div placed inside a peghole div */
+.peg {
+    height: 100%;
+    transform: scale(1.25);
+    border-radius: 50%;
+    transition: transform .25s ease-in-out;
+}
+.peg.blue { background-color: var(--boardbluecolor); }
+.peg.red { background-color: var(--boardredcolor); }
+.peg.animate {
+    z-index: 4;
+    transform: scale(2.5);
+    --duration: 0.5s;
+}
+
+/* horizontal styles */
+/* boardnum horizontal styles */
+.boardnum.horizontal {
+    height: 100%;
+    width: var(--boardnum-width);
+    line-height: 2.5em;
+}
+/* boardblock horizontal styles */
+.boardblock.horizontal {
+    /* fill height (width) of board */
+    height: 100%;
+    width: var(--boardblock-width);
+    /* pad top and bottom to squeeze pegholes together */
+    padding: 0.5em 0;
+}
+/* horizontal peghole spacing */
+.boardblock.horizontal > .peghole { margin: 0.125em var(--peghole-spacing); }
+
+/* finish line */
+/* set boardblock to 1 peghole width */
+.boardblock.finish.horizontal { width: var(--peghole-diameter); }
+/* remove lateral margin and apply centering vertical margin */
+.boardblock.finish.horizontal > .peghole { margin: 0.5em 0; }
+
+/* start line */
+/* set boardblock to 1 peghole width */
+.boardblock.start.vertical { height: var(--peghole-diameter); }
+/* remove lateral margin and apply centering vertical margin */
+.boardblock.start.vertical > .peghole { margin: 0 0.125em; }
+
+/* vertical styles */
+.boardnum.vertical {
+    /* vertical boardnum width is applied to height */
+    height: var(--boardnum-width);
+    /* fill board width when rotated on side */
+    width: 100%;
+    /* vertical text alignment in vertical orientation */
+    line-height: 1.85em;
+    /* override text cursor on vertical text in safari */
+    cursor: default;
+}
+/* rotate numbers in both vertical orientations */
+.screen.left > .boardnum.vertical { transform: rotate(270deg); }
+.screen.right > .boardnum.vertical { transform: rotate(90deg); }
+
+.boardblock.vertical {
+    /* boardblock uses width as height in vertical orientation */
+    height: var(--boardblock-width);
+    /* fill board width */
+    width: 100%;
+    /* padding across long axis to squeeze holes together */
+    padding: 0 0.5em;
+}
+/* apply peghole spacing along vertical access */
+.boardblock.vertical > .peghole { margin: var(--peghole-spacing) 0.125em; }

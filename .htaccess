@@ -1,0 +1,56 @@
+# limit size of uploads to 1 megabyte
+LimitRequestBody 1000000
+
+RewriteEngine On
+# RewriteRule flags
+# QSA qsappend    append the new querystring to the current request instead of replacing it entirely
+# PT  Passthrough force redirection to be considered as URI instead of filepath
+# L   Last        do not process more rules if this one matches
+# R   Redirect    if this rule matches, redirect the browser to a new URL, otherwise new site will be served with current url
+# NC  Nocase      matches are case insensitive
+
+# strip vers from querystring
+RewriteCond %{QUERY_STRING} ^(.*)&?vers=[^&]*&?(.*)$ [NC]
+RewriteRule ^/?(.*)$ /$1?%1%2 [L]
+
+# app redirections
+
+# PRODUCTION MODE (UNCOMMENT THESE RULES IN PROD)
+# redirect css
+#RewriteRule ^css/style.css(.*)$ dist/style.min.css [L,NC]
+# redirect js
+#RewriteRule ^js/app.js(.*)$ dist/app.min.js [L,NC]
+#RewriteRule ^js/service.js(.*)$ dist/service.min.js [L,NC]
+
+# DEVELOPMENT MODE
+# redirect styles.css to php
+RewriteRule ^css/style.css(.*)$ css/style.php [L,NC]
+
+# deliver asset/css/js/.version to client directly without routing through php application
+RewriteRule ^asset/? - [L,NC]
+RewriteRule ^css/? - [L,NC]
+RewriteRule ^js/? - [L,NC]
+RewriteRule ^dist/? - [L,NC]
+RewriteRule ^\.version$ - [L,NC]
+# exempt tls directory
+RewriteRule ^\.well-known/? - [L,NC]
+
+# return 404 to any favicon.ico request
+RewriteRule ^([^/]+/)*favicon\.ico$ - [R=404,L,NC]
+
+# continue if the request was a file that does not exist
+#RewriteCond %{REQUEST_FILENAME} !-f
+# continue if the directory does not exist
+#RewriteCond %{REQUEST_FILENAME} !-d
+# route any other requests through index.php
+RewriteRule ^(.*)$ index.php?load=$1 [L,PT,QSA]
+
+## implicit .php in path
+## if the file doesnt exist
+#RewriteCond %{REQUEST_FILENAME} !-f
+## if the directory doesnt exist
+#RewriteCond %{REQUEST_FILENAME} !-d
+## and if there is a path.php file
+#RewriteCond %{REQUEST_FILENAME}\.php -f
+## remap url to the php file
+#RewriteRule ^(.*)$ $1.php

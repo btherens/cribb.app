@@ -1,0 +1,68 @@
+/* responsive column layout */
+[class*="width-"] {
+    width: 100%;
+    align-items: center;
+}
+.width-1 > * { max-width: 16em; width: 100%; }
+
+/* tall aspect ratio */
+* {                                        --scale-factor: calc( ( 100 * var(--vw-unit)           - 2 * 2.5 * var(--screen-scale) ) / 100 ); }
+/* width-scaling elements reach maximum scale at 2/3 ratio */
+@media ( min-aspect-ratio: 2/3     ) { * { --scale-factor: calc( ( 100 * var(--vh-unit) * 2/3     - 2 * 2.5 * var(--screen-scale) ) / 100 ); } }
+/* widescreen scale factor */
+@media ( min-aspect-ratio: 101/100 ) { * { --scale-factor: calc( ( 100 * var(--vw-unit) / 2.5     - 2 * 2.5 * var(--screen-scale) ) / 100 ); } }
+/* width-scaling elements reach maximum scale at 3/1 ratio */
+@media ( min-aspect-ratio: 3/1     ) { * { --scale-factor: calc( ( 100 * var(--vh-unit) * 3 / 2.5 - 2 * 2.5 * var(--screen-scale) ) / 100 ); } }
+
+/*
+ * screen scaling
+ */
+
+/* default scale (tall layout) */
+body {
+    --screen-scale: 1em;
+    font-size: var(--screen-scale);
+}
+/* hide any conditional divs in all orientations by default */
+.l-hide { display: none; }
+/* tall layout */
+.l-hide.l-show-tall { display: block; }
+/* board area scope variables */
+/* horizontal peghole spacing */
+.top, .bottom { --peghole-spacing: calc(0.5 * var(--vw-unit)); }
+/* vertical peghole spacing */
+.left, .right { --peghole-spacing: calc(0.2 * var(--vh-unit)); }
+
+/* tall layout */
+/* scaling */
+@media (max-aspect-ratio: 3/4) {
+    /* proportional width and height at smaller resolutions */
+    @media (max-width: 410px), (max-height: 718px) { body {
+        /* scaling proportional to most limited dimension */
+        --screen-scale: min( calc(var(--vw-unit) * 100/( 410/16 )), calc(var(--vh-unit) * 100/( 718/16 )));
+    } }
+}
+
+/* square layout */
+@media (min-aspect-ratio: 3/4) {
+    .l-hide.l-show-tall { display: none; }
+    .l-hide.l-show-square { display: block; }
+    .top, .bottom { --peghole-spacing: calc(0.35 * var(--vw-unit)); }
+    .left, .right { --peghole-spacing: calc(0.35 * var(--vh-unit)); }
+
+    @media (max-aspect-ratio: 4/3) { @media (max-width: 800px), (max-height: 800px) { body {
+        --screen-scale: min( calc(var(--vw-unit) * 100/( 800/16 )), calc(var(--vh-unit) * 100/( 800/16 )));
+    } } }
+}
+
+/* wide layout */
+@media (min-aspect-ratio: 4/3) {
+    .l-hide.l-show-square { display: none; }
+    .l-hide.l-show-wide { display: block; }
+    .top, .bottom { --peghole-spacing: calc(0.2 * var(--vw-unit)); }
+    .left, .right { --peghole-spacing: calc(0.5 * var(--vh-unit)); }
+
+    @media (max-width: 718px), (max-height: 410px) { body {
+        --screen-scale: min( calc(var(--vw-unit) * 100/( 718/16 )), calc(var(--vh-unit) * 100/( 410/16 )));
+    } }
+}

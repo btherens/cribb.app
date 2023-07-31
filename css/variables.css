@@ -1,0 +1,37 @@
+/* variables */
+:root {
+    /* colors */
+    --tablecolor: rgb(69, 153, 125);
+    --tableaccent: rgb(234, 247, 183);
+    --tablebluecolor: rgb(191, 191, 225);
+    --tableredcolor: rgb(235, 152, 152);
+
+    --boardcolor: rgb(239, 182, 91);
+    --boardbluecolor: rgb(92, 108, 225);
+    --boardredcolor: rgb(235, 50, 13);
+    --boardcolorlight: rgb(235, 198, 140);
+    --pegholecolor: rgb(138, 85, 0);
+    --buttoncolor: var(--tableaccent);
+    --buttoncolor2: rgb(222, 159, 59);
+    /* text colors */
+    --textcolor: rgb(61, 63, 50);
+    --textcolor2: rgb(114, 115, 112);
+    /* control colors */
+    --btn-control-color: rgb(255, 243, 208);
+    --btn-control-color-disabled: rgba(255, 243, 208, 0.4);
+    /* layouts */
+    --list-rank-color: rgb(104, 139, 97);
+    --list-rank-new-color: var(--tablecolor);
+    --list-text-light-color: var(--btn-control-color);
+    /* card colors */
+    --cardcolor: rgb(92, 108, 225);
+    --cardfacecolor: rgb(238, 238, 238);
+    --cardredcolor: rgb(204, 88, 64);
+    --cardblackcolor: rgb(41, 42, 24);
+    /* sizes */
+    --boardwidth: 2.5em;
+    --peghole-diameter: 0.5em;
+    --cardfan-scale: 40;
+    --cardspread-scale: 22;
+    --buttonfont-scale: 5.5;
+}

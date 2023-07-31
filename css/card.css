@@ -1,0 +1,218 @@
+/* basic card (list item) styles */
+.card {
+    /* remove traditional list styles */
+    list-style-type: none;
+    /* relative positioning- object obeys flow of page but can be offset with top/left */
+    position: relative;
+    /* horizontally center card images */
+    text-align: center;
+}
+
+/* pointer cursor on hover over candrag elements */
+.card.candrag { cursor: pointer; }
+
+/* basic pseudo elemenet styles */
+.card:after {
+    /* ensure psuedoelements are visible */
+    content: '';
+    /* line breaks both before and after element */
+    display: block;
+    /* disable pointer events by default */
+    pointer-events: none;
+}
+
+/* basic card look */
+.card:after {
+    /* the font to use for card faces */
+    font-family: 'Symbola';
+    /* rounded edges */
+    border-radius: 0.08em;
+    /* remove top/bottom padding */
+    padding: 0;
+    /* card color */
+    background: var(--cardfacecolor);
+    /* shadow behind cards */
+    box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* no shadows are visible if hand is "on table" */
+.ontable > .card:after { box-shadow: none; }
+
+/* collection styles */
+ul {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 1em;
+    justify-content: center;
+    transition: height 0.3s ease-in-out, font-size 0.3s ease-in-out;
+}
+
+/* cardstack style */
+.cardstack {
+    /* height: var(--cardspread-eff-scale); */
+    /* card scale */
+    font-size: var(--cardspread-eff-scale);
+}
+.cardstack > .card {
+    /* spacing between cards */
+    margin: 0 -0.37em;
+}
+
+/* cardspread style */
+.cardspread {
+    /* height: var(--cardspread-eff-scale); */
+    /* card scale */
+    font-size: var(--cardspread-eff-scale);
+    margin-bottom: 0.2em;
+}
+.cardspread > .card {
+    /* spacing between cards */
+    margin: 0 -0.3em;
+}
+/* big cardspreads require tight margins */
+.cardspread:not( .stack ):has( > .card:nth-child(16) ) > .card {
+    /* spacing between cards */
+    margin: 0 -0.365em;
+}
+.cardspread.stack > .card {
+    /* set cards on top of one another */
+    margin: 0 -0.3983em;
+}
+/* animate neutral hand margin changes if the collection has multiple cards */
+#neutralcards.animatemargin > .card:not( .active ) { transition: margin 0.4s ease-in-out; }
+
+/* don't render card shadows in large collections */
+.cardspread:has( > .card:nth-child(10) ) > .card:not( .active ):after { box-shadow: none; }
+
+/* offset cards in the neutral collection */
+#neutralcards.cardspread > .card.down { transform: translateY(0.25em); }
+#neutralcards.cardspread > .card.up   { transform: translateY(-0.25em); }
+
+/* handfan style */
+.cardfan {
+    /* height: 1em; */
+    /* card scale */
+    font-size: var(--cardfan-eff-scale);
+    width: 100%;
+    margin: 0.1em 0;
+}
+.cardfan > .card {
+    /* spacing between cards */
+    margin: 0 -0.3em;
+}
+
+/* variations on hand size */
+/* 1 */
+.cardfan:has( > .card:nth-child(1) ) > .card:nth-child(1):after { transform: rotate(0deg) translateY(0%); }
+/* 2 */
+.cardfan:has( > .card:nth-child(2) ) > .card:nth-child(1):after { transform: rotate(-5deg) translateY(1%); }
+.cardfan:has( > .card:nth-child(2) ) > .card:nth-child(2):after { transform: rotate(5deg) translateY(1%); }
+/* 3 */
+.cardfan:has( > .card:nth-child(3) ) > .card:nth-child(1):after { transform: rotate(-8.75deg) translateY(1.25%); }
+.cardfan:has( > .card:nth-child(3) ) > .card:nth-child(2):after { transform: rotate(0deg) translateY(0%); }
+.cardfan:has( > .card:nth-child(3) ) > .card:nth-child(3):after { transform: rotate(8.75deg) translateY(1.25%); }
+/* 4 */
+.cardfan:has( > .card:nth-child(4) ) > .card:nth-child(1):after { transform: rotate(-12deg) translateY(1.25%); }
+.cardfan:has( > .card:nth-child(4) ) > .card:nth-child(2):after { transform: rotate(-5deg) translateY(1%); }
+.cardfan:has( > .card:nth-child(4) ) > .card:nth-child(3):after { transform: rotate(5deg) translateY(1%);  }
+.cardfan:has( > .card:nth-child(4) ) > .card:nth-child(4):after { transform: rotate(12deg) translateY(1.25%); }
+/* 5 */
+.cardfan:has( > .card:nth-child(5) ) > .card:nth-child(1):after { transform: rotate(-17.5deg) translateY(2.5%); }
+.cardfan:has( > .card:nth-child(5) ) > .card:nth-child(2):after { transform: rotate(-8.75deg) translateY(1.25%); }
+.cardfan:has( > .card:nth-child(5) ) > .card:nth-child(3):after { transform: rotate(0deg) translateY(0%); }
+.cardfan:has( > .card:nth-child(5) ) > .card:nth-child(4):after { transform: rotate(8.75deg) translateY(1.25%); }
+.cardfan:has( > .card:nth-child(5) ) > .card:nth-child(5):after { transform: rotate(17.5deg) translateY(2.5%); }
+/* 6 */
+.cardfan:has( > .card:nth-child(6) ) > .card:nth-child(1):after { transform: rotate(-20deg) translateY(5.0%); }
+.cardfan:has( > .card:nth-child(6) ) > .card:nth-child(2):after { transform: rotate(-12deg) translateY(1.25%); }
+.cardfan:has( > .card:nth-child(6) ) > .card:nth-child(3):after { transform: rotate(-4deg) translateY(0.75%); }
+.cardfan:has( > .card:nth-child(6) ) > .card:nth-child(4):after { transform: rotate(4deg) translateY(0.75%); }
+.cardfan:has( > .card:nth-child(6) ) > .card:nth-child(5):after { transform: rotate(12deg) translateY(1.25%); }
+.cardfan:has( > .card:nth-child(6) ) > .card:nth-child(6):after { transform: rotate(20deg) translateY(5.0%); }
+
+/* rotation and zoom of card and drop shadow (!important so that it overrides more specific handfan styles) */
+.card.active:after {
+    transform: rotate( 0deg ) translate(0%, -05%) scale(1.15) !important;
+    box-shadow: 0 10px 20px 5px rgba(0, 0, 0, 0.20);
+}
+
+/* put down */
+/* return to original position */
+.card:not(.active) {
+    left: 0;
+    top: 0;
+    /* animate return to dom */
+    transition:
+        left      0.1s cubic-bezier( 0.33333, 0.66667, 0.66667, 1 ),
+        top       0.1s cubic-bezier( 0.33333, 0.66667, 0.66667, 1 ),
+        transform 0.1s cubic-bezier( 0.33333, 0.66667, 0.66667, 1 );
+}
+
+/* return to original position */
+.card:after { transition: transform 0.4s cubic-bezier(0.46, 0.01, 0.3, 0.98), box-shadow 0.4s cubic-bezier(0.46, 0.01, 0.3, 0.98); }
+
+/* pickup */
+/* shadow transform and fade-in speed */
+.card.active:after { transition: transform 0.25s cubic-bezier(0.32, 0, 0.32, 1.42), box-shadow 0.25s cubic-bezier(0.32, 0, 0.32, 1.42); }
+
+/* card unicode icons */
+.card.facedown:after { content: '\1F0A0'; }
+.card.s0.c0:after    { content: '\1F0A1'; }
+.card.s1.c0:after    { content: '\1F0B1'; }
+.card.s2.c0:after    { content: '\1F0C1'; }
+.card.s3.c0:after    { content: '\1F0D1'; }
+.card.s0.c1:after    { content: '\1F0A2'; }
+.card.s1.c1:after    { content: '\1F0B2'; }
+.card.s2.c1:after    { content: '\1F0C2'; }
+.card.s3.c1:after    { content: '\1F0D2'; }
+.card.s0.c2:after    { content: '\1F0A3'; }
+.card.s1.c2:after    { content: '\1F0B3'; }
+.card.s2.c2:after    { content: '\1F0C3'; }
+.card.s3.c2:after    { content: '\1F0D3'; }
+.card.s0.c3:after    { content: '\1F0A4'; }
+.card.s1.c3:after    { content: '\1F0B4'; }
+.card.s2.c3:after    { content: '\1F0C4'; }
+.card.s3.c3:after    { content: '\1F0D4'; }
+.card.s0.c4:after    { content: '\1F0A5'; }
+.card.s1.c4:after    { content: '\1F0B5'; }
+.card.s2.c4:after    { content: '\1F0C5'; }
+.card.s3.c4:after    { content: '\1F0D5'; }
+.card.s0.c5:after    { content: '\1F0A6'; }
+.card.s1.c5:after    { content: '\1F0B6'; }
+.card.s2.c5:after    { content: '\1F0C6'; }
+.card.s3.c5:after    { content: '\1F0D6'; }
+.card.s0.c6:after    { content: '\1F0A7'; }
+.card.s1.c6:after    { content: '\1F0B7'; }
+.card.s2.c6:after    { content: '\1F0C7'; }
+.card.s3.c6:after    { content: '\1F0D7'; }
+.card.s0.c7:after    { content: '\1F0A8'; }
+.card.s1.c7:after    { content: '\1F0B8'; }
+.card.s2.c7:after    { content: '\1F0C8'; }
+.card.s3.c7:after    { content: '\1F0D8'; }
+.card.s0.c8:after    { content: '\1F0A9'; }
+.card.s1.c8:after    { content: '\1F0B9'; }
+.card.s2.c8:after    { content: '\1F0C9'; }
+.card.s3.c8:after    { content: '\1F0D9'; }
+.card.s0.c9:after    { content: '\1F0AA'; }
+.card.s1.c9:after    { content: '\1F0BA'; }
+.card.s2.c9:after    { content: '\1F0CA'; }
+.card.s3.c9:after    { content: '\1F0DA'; }
+.card.s0.c10:after   { content: '\1F0AB'; }
+.card.s1.c10:after   { content: '\1F0BB'; }
+.card.s2.c10:after   { content: '\1F0CB'; }
+.card.s3.c10:after   { content: '\1F0DB'; }
+.card.s0.c11:after   { content: '\1F0AD'; }
+.card.s1.c11:after   { content: '\1F0BD'; }
+.card.s2.c11:after   { content: '\1F0CD'; }
+.card.s3.c11:after   { content: '\1F0DD'; }
+.card.s0.c12:after   { content: '\1F0AE'; }
+.card.s1.c12:after   { content: '\1F0BE'; }
+.card.s2.c12:after   { content: '\1F0CE'; }
+.card.s3.c12:after   { content: '\1F0DE'; }
+/* default card color (back) */
+.card, .cardtext { color: var(--cardcolor); }
+/* black suits */
+.card.s0, .card.s3, .cardtext.s0, .cardtext.s3 { color: var(--cardblackcolor); }
+/* red suits */
+.card.s1, .card.s2, .cardtext.s1, .cardtext.s2 { color: var(--cardredcolor); }

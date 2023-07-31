@@ -1,0 +1,104 @@
+/* enforce some distance between opponent block and neutral block */
+#opp-block { margin-bottom: 1em; }
+/* widescreen style changes  */
+@media ( min-aspect-ratio: 101/100 ) {
+    /* center opponent block in left flex column */
+    #opp-block {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+/* layering help when opponent handfan is active */
+#opp-block:has( .cardfan ) { z-index: 2; }
+
+#neutral-block {
+    /* expand block to max (anchor block below it to bottom) */
+    flex-grow: 1;
+    /* create expandable box inside this (to anchor cards as well) */
+    display: flex;
+    flex-direction: column;
+}
+@media ( min-aspect-ratio: 101/100 ) { #neutral-block { margin-top: 0; } }
+
+/* animate change in crib display */
+/* #neutral-block > div { transition: flex 0.4s ease; } */
+#neutral-block > div:nth-child(1), #neutral-block > div:nth-child(3) { flex-grow: 1; }
+/* remove flex from 3rd child in neutral block to pin cards to bottom */
+.player-crib #neutral-block > div:nth-child(3), .opponent-crib #neutral-block > div:nth-child(3) { flex-grow: unset; }
+/* flip the result of crib flex to pin crib to top instead */
+/*
+.opponent-crib #neutral-block, .opponent-crib #neutral-block > .cardsrow, .opponent-crib #neutral-block .floattext { transform: rotate(180deg); }
+*/
+.opponent-crib #neutral-block, .opponent-crib #neutral-block > .cardsrow, .opponent-crib #neutral-block .floattext { transform: rotate(180deg); }
+
+/* wide layout crib alignment */
+@media ( min-aspect-ratio: 101/100 ) {
+    /* disable tall layout crib layout */
+    #neutral-block > div:nth-child(1), #neutral-block > div:nth-child(3) { flex-grow: unset; }
+    /* disable cardsrow rotation */
+    .opponent-crib #neutral-block, .opponent-crib #neutral-block > .cardsrow, .opponent-crib #neutral-block .floattext { transform: none; }
+
+    /* apply rotation to the row and its children to  low divs in central flex column from bottom to top */
+    .game-container #neutral-block > .cardsrow,
+    .game-container #neutral-block > .cardsrow > * {
+        transform: rotate(180deg); 
+    }
+    /* reset layering after transform */
+    .game-container #neutral-block > .cardsrow { z-index: 0; }
+
+    /* use float and some margin to align cardsrow horizontally in wide layout */
+    .player-crib .cardsrow > div:nth-child(1) ul, .player-crib .cardsrow > div:nth-child(3) ul {
+        float: right;
+        margin-right: 0.5em;
+    }
+    .opponent-crib .cardsrow > div:nth-child(1) ul, .opponent-crib .cardsrow > div:nth-child(3) ul {
+        float: left;
+        margin-left: 0.5em;
+    }
+}
+/* apply margin to crib to offset spread margin */
+.cardsrow > div:nth-child(3) ul { margin-right: 0.2em; }
+
+.game-container {
+    /* screen elements flex in column direction */
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+}
+
+.cardsrow {
+    display: flex;
+    justify-content: space-between;
+    /* add margin around row */
+    /* margin-bottom: 2em; */
+}
+/* neutral row widths: 20% / 50% / 20% */
+.cardsrow > div:first-child, .cardsrow > div:last-child { width: 20%; }
+.cardsrow > div:nth-child(2) { width: 55%; }
+
+/* conditionally hide cardsrow items */
+.cardsrow > div { transition: opacity 0.2s ease; }
+.cardsrow > div.hide { opacity: 0; }
+
+/* tactile ui - table colors */
+.tactile.table {
+    /* colors */
+    /* background color */
+    --btn-background-1: rgb(234, 247, 230);
+    /* background color - alternate */
+    --btn-background-2: rgb(234, 247, 218);
+    /* under color */
+    --btn-back: var(--buttoncolor); /* rgb(234, 247, 183); */
+    /* outline */
+    --btn-outline: rgb(61, 63, 50);
+}
+/* other table button overrides */
+.button.tactile.table {
+    font-size: var(--buttonfont-eff-scale);
+    font-weight: bold;
+    height: 3em;
+    width: 100%;
+    /* top margin to counteract raised button style */
+    margin: 1.5rem 0 0;
+}

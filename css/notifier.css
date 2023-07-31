@@ -1,0 +1,48 @@
+#notifybar {
+    /* define menu scale in var to help with non-scaling handling */
+    position: fixed;
+    left: var(--boardwidth);
+    top: var(--boardwidth);
+    width: calc(100% - var(--boardwidth) * 2);
+    /* set offset and width explicitly because of fixed position */
+    left: calc( var(--boardwidth) + env(safe-area-inset-left) - 1px );
+    width: calc(100% - var(--boardwidth) * 2 - env(safe-area-inset-left) - env(safe-area-inset-right) + 2px );
+    /* float above everything we can */
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--pegholecolor);
+    border-radius: 1.1em;
+    overflow: hidden;
+    /* set height to 0 and animate expand */
+    height: 0;
+
+}
+/* pan contents starting from left */
+#notifybar.pan {
+    justify-content: left;
+}
+#notifybar.pan > span {
+    transition: transform 3s ease 1s;
+}
+#notifybar.transition {
+    transition: height 0.5s ease-out;
+}
+/* set height when notifybar is shown */
+/*
+#notifybar.show { height: calc(1em * var(--pulldown-scale)); }
+*/
+/* height - .1em less than pulldown scale (2.4) */
+#notifybar.show { height: 2.3em; }
+/* notifybar text style */
+#notifybar > span {
+    font-weight: 700;
+    font-size: 2.0em;
+    color: var(--boardcolor);
+    white-space: nowrap;
+    margin-right: 0.2em;
+    margin-left: 0.2em;
+}
+/* justify to right in widescreen layout */
+@media (min-aspect-ratio: 101/100) { #notifybar { justify-content: right; } }

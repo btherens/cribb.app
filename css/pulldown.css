@@ -1,0 +1,391 @@
+#pulldown-menu {
+    /* define menu scale in var to help with non-scaling handling */
+    --pulldown-scale: 2.4;
+    font-size: calc(1em * var(--pulldown-scale));
+    font-weight: 700;
+    height: 0em;
+    position: fixed;
+    left: calc( var(--boardwidth) / var(--pulldown-scale) - 1px );
+    top: calc( var(--boardwidth) / var(--pulldown-scale) - 1px );
+    width: calc(100% - var(--boardwidth) / var(--pulldown-scale) * 2 + 2px );
+    left: calc( var(--boardwidth) / var(--pulldown-scale) + env(safe-area-inset-left) - 1px );
+    width: calc(100% - var(--boardwidth) / var(--pulldown-scale) * 2 - env(safe-area-inset-left) - env(safe-area-inset-right) + 2px );
+}
+/* default dropdown height */
+#pulldown-menu.show {
+    /* 9em - menu buttons
+     * 1.825rem - extra button height
+     */
+    height: calc(9em + 1.825rem);
+}
+/* full height menu */
+#pulldown-menu.show.fullscreen {
+    height: calc( 100 * var(--vh-unit) - var(--boardwidth) / var(--pulldown-scale) * 2 + 2px );
+    /* experimental - this code breaks in some mobile safari interactions */
+    /* height: calc( 100 * var(--vh-unit) - var(--boardwidth) / var(--pulldown-scale) * 2 - env(safe-area-inset-top) - env(safe-area-inset-bottom) + 2px ); */
+}
+/* hide mainscreen when in full height menu to help with rendering bugs */
+#pulldown-menu.show.fullscreen + #mainscreen {
+    visibility: hidden; 
+    transition: visibility 0s ease 0.3s;
+}
+
+.pd-header {
+    font-size: 0.8em;
+    color: var(--pegholecolor);
+    white-space: nowrap;
+    /* hide the header by default */
+    opacity: 0;
+}
+/* fade-in header visibility (no fadeout) */
+.pd-header.unhide {
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+#notifybar.show + #pulldown-menu #pd-button {
+    opacity: 0;
+}
+#notifybar:not( .show ) + #pulldown-menu #pd-button {
+    transition: opacity 0.5s ease-out 0.6s;
+}
+
+.boardlink {
+    color: var(--pegholecolor);
+    height: calc(2em + 0.625rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: underline;
+    font-size: 0.8em;
+}
+/* .pd-headers are moved and rendered elsewhere */
+.menupane .pd-header { display: none; }
+/* text/div alignment hack */
+#pulldown-menu .pd-header:empty {
+    display: none;
+}
+
+#pd-button {
+    /*
+    position: fixed;
+    width: calc(100% - var(--boardwidth) / var(--pulldown-scale) * 2);
+    width: calc(100% - var(--boardwidth) / var(--pulldown-scale) * 2 - env(safe-area-inset-left) - env(safe-area-inset-right));
+    */
+    /* hamburger color transitions */
+    background-color: var(--boardcolor);
+    transition: background-color 0.2s ease, opacity 0.1s ease;
+    width: 100%;
+    height: 1em;
+    border-radius: calc(1.1em / var(--pulldown-scale)) calc(1.1em / var(--pulldown-scale)) 0 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#pd-button > div {
+    white-space: nowrap;
+    display: flex;
+    /* height: 1em; */
+    align-items: center;
+    justify-content: space-between;
+    /* wrap button content in left+right header */
+    margin: 0 0.2em 0;
+}
+#pd-button #pd-hamburger {
+    margin-right: 0.2em;
+}
+#pulldown-menu.notoggle #pd-button #pd-hamburger {
+    margin-right: 0;
+}
+/* don't apply any margins to button in header if it doesn't exist */
+/*
+#pd-button > div > *:first-child, #pulldown-menu.notoggle .pd-header { margin-left: 0.2em; }
+*/
+
+#pulldown-menu:not( .show ) #pd-button:has( .pd-header.color ) .pd-header {
+    color: var(--boardbluecolor);
+}
+#pulldown-menu:not( .show ) #pd-button:has( .pd-header.color ) #pd-hamburger > div {
+    background-color: var(--boardbluecolor);
+}
+#pulldown-menu:not( .show ) #pd-button:has( .pd-header.color.red ) .pd-header {
+    color: var(--boardredcolor);
+}
+#pulldown-menu:not( .show ) #pd-button:has( .pd-header.color.red ) #pd-hamburger > div {
+    background-color: var(--boardredcolor);
+}
+
+/* hamburger */
+/* hamburger transform change */
+#pd-hamburger > div {
+    transition: transform 0.3s ease-out, width 0.3s ease-out, margin 0.3s ease-out;
+}
+
+/* pulldown menu slide */
+#pulldown-menu {
+    transition: height 0.3s ease;
+}
+
+/* fade in color change on hovor */
+#pulldown-menu.show #pd-hamburger:hover > div { transition: transform 0.3s ease-out, background-color 0.2s ease; }
+
+/* Hamburger */
+#pd-hamburger {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    justify-items: center;
+    width: 1em;
+    height: 1em;
+}
+.animate {
+    /* support animations */
+    left: 0;
+    top: 0;
+    position: relative;
+    --duration: 0.1s;
+}
+.animate.do {
+    transition: left var(--duration) ease-in-out, top var(--duration) ease-in-out, transform var(--duration) ease-in-out;
+}
+
+/* pulldown container */
+#pd-navbar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+}
+/* drop shadow beneath navbar */
+#pulldown-menu.show #pd-navbar { box-shadow: 0 1.2em 1.2em -1.2em rgba(0, 0, 0, 0.3); }
+/* no box-shadow on full screen menu */
+#pulldown-menu.show.fullscreen #pd-navbar { box-shadow: none; }
+
+/* delay pulldown box-shadow to appear after menu slide */
+#pulldown-menu.show #pd-navbar {
+    transition: box-shadow 0.1s ease-in-out 0.3s;
+}
+
+/* hamburger button styles */
+#pd-hamburger > div {
+    /* button color */
+    background-color: var(--pegholecolor);
+    /* dimensions */
+    width: 1em;
+    height: 0.1em;
+    border-radius: 0.1em;
+    margin-top: 0.1em;
+    position: relative;
+}
+
+#pulldown-menu.show:not( .notoggle ) #pd-button {
+    background-color: var(--pegholecolor);
+    cursor: pointer;
+}
+#pulldown-menu.show:not( .notoggle ) #pd-button span {
+    color: var(--boardcolor);
+}
+#pulldown-menu.show:not( .notoggle ) #pd-button #pd-hamburger > div {
+    background-color: var(--boardcolor);
+}
+
+/* hide hamburger if notoggle is set */
+#pulldown-menu.notoggle #pd-hamburger { width: 0; }
+#pulldown-menu.notoggle #pd-hamburger > div.pdh-top,
+#pulldown-menu.notoggle #pd-hamburger > div.pdh-middle,
+#pulldown-menu.notoggle #pd-hamburger > div.pdh-bottom { transform: scale(0) !important; }
+/* shift first hamburger bar into checked position */
+#pulldown-menu.show #pd-hamburger .pdh-top {
+    transform: rotate(-45deg);
+    margin-top: 0.44em;
+}
+/* shift second hamburger bar into checked position */
+#pulldown-menu.show #pd-hamburger .pdh-middle {
+    transform: rotate(45deg);
+    margin-top: -0.1em;
+}
+/* hide bottom hamburger bar completely when checked */
+#pulldown-menu.show #pd-hamburger .pdh-bottom { transform: scale(0); }
+/* hamburger button (back arrow variant) */
+#pulldown-menu.show #pd-hamburger.back .pdh-top {
+    transform: rotate(-26.565deg);
+    width: 0.79056em;
+    margin-top: calc(0.44em - 0.17678em);
+    margin-top: 0.263223em;
+}
+#pulldown-menu.show #pd-hamburger.back .pdh-middle {
+    transform: rotate(26.565deg);
+    width: 0.79056em;
+    margin-top: calc(-0.1em + 0.35355em);
+    margin-top: 0.253553em;
+}
+
+/* expand menu with flex */
+#pulldown-menu.show .pd-menunav { flex: 1; }
+
+/* Menu */
+.pd-menunav {
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    background-color: var(--boardcolor);
+    text-align: center;
+    height: 0em;
+    overflow: hidden;
+    border-radius: 0 0 calc(1.1em / var(--pulldown-scale)) calc(1.1em / var(--pulldown-scale));
+}
+.pd-menunav > *:first-child {
+    /*
+     * 0.625rem - height of shadow
+     */
+    margin-top: 0.625rem;
+}
+.tactile-margin {
+    margin-top: calc(0.75rem);
+}
+
+/* pulldown menu styles */
+/* menu slide down / up */
+.pd-menunav { transition: flex 0.3s ease-out; }
+/* fade-in on link hover (no fade-out) */
+
+
+
+/* board button colors */
+.tactile.board {
+    /* colors */
+    /* background color */
+    --btn-background-1: var(--boardcolorlight);
+    /* background color - alternate */
+    --btn-background-2: rgb(231, 189, 121);
+    /* under color */
+    --btn-back: var(--buttoncolor2);
+    /* outline */
+    --btn-outline: var(--pegholecolor);
+    /* other definitions */
+    height: 2em;
+}
+
+/* menu multi-view container */
+#pd-menuslide {
+    height: calc(100% - 0.625rem);
+}
+
+/* each menupane is actual width of view */
+.menupane {
+    height: 100%;
+    width: calc(100% * 1/3);
+    float: left;
+    background-color: var(--boardcolor);
+    /* expand menu vertically to fit entire screen */
+    display: flex;
+    flex-direction: column;
+}
+/* add curve to menus and their inner content */
+.menupane {
+    overflow: hidden;
+    border-radius: 0 0 calc(1.1em / var(--pulldown-scale)) calc(1.1em / var(--pulldown-scale));
+}
+.menupane > div {
+    /* margin-top: auto; */
+    margin-bottom: 0.625rem;
+    height: 100%;
+}
+
+.menupane > div.scroll::-webkit-scrollbar { display: none; }
+.menupane > div.scroll {
+    margin-bottom: 0rem;
+    overflow: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* pseudo-element placed over top of scroll content for box-shadow */
+div.scroll::before {
+    position: absolute;
+    content:'';
+    display: block;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: box-shadow 0.4s ease;
+}
+/* show shadow at top of scroll */
+div.scroll.noshadow::before {
+    opacity: 0;
+}
+/* top scroll shadow */
+div.scroll.top::before {
+    box-shadow: 0 1.2em 1.2em -1.2em rgba(0, 0, 0, 0.3) inset;
+}
+/* bottom scroll shadow */
+div.scroll.bottom::before {
+    box-shadow: 0 -1.2em 1.2em -1.2em rgba(0, 0, 0, 0.3) inset;
+}
+/* top+bottom scroll shadow */
+div.scroll.top.bottom::before {
+    box-shadow: 0 1.2em 1.2em -1.2em rgba(0, 0, 0, 0.3) inset, 0 -1.2em 1.2em -1.2em rgba(0, 0, 0, 0.3) inset;
+}
+
+/* flex-container column/row/dynamic
+ * allow children of this container to expand along the given axis
+ */
+.flex-container         { display: flex; }
+.flex-container.column  { flex-direction: column; }
+.flex-container.row     { flex-direction: row; }
+.flex-container.dynamic { flex-direction: column; }
+@media ( min-aspect-ratio: 101 / 100 ) { .flex-container .dynamic { flex-direction: row; } }
+
+/* flex-all - always flex this box */
+.flex-all { flex-grow: 1; }
+/* fullscreen-flex-all - only flex this box if inside an element with fullscreen class (fullscreen pulldown menu */
+.fullscreen .fullscreen-flex-all { flex-grow: 1; }
+/* tall/wide variants */
+@media ( max-aspect-ratio: 101 / 100 ) {
+    .fullscreen .fullscreen-flex-tall { flex-grow: 1; }
+    .flex-tall { flex-grow: 1; }
+}
+@media ( min-aspect-ratio: 101 / 100 ) {
+    .fullscreen .fullscreen-flex-wide { flex-grow: 1; }
+    .flex-wide { flex-grow: 1; }
+}
+
+/* only show when menu is full-screen and tall layout */
+.fullscreen-show-tall { display: none; }
+@media ( max-aspect-ratio: 101 / 100 ) { .fullscreen .fullscreen-show-tall { display: flex; } }
+
+/* when #pd-menuslide.on, shift to second pane with a 0.3s transition */
+#pd-menuslide { width: 300%; }
+#pd-menuslide.one   .menupane { }
+#pd-menuslide.two   .menupane { transform: translateX(-100%); }
+#pd-menuslide.three .menupane { transform: translateX(-200%); }
+
+/* apply a visibility mask to menupane contents when transform holds pane off-screen */
+#pd-menuslide.one .menupane:first-child {
+    visibility: unset;
+    transition: transform 0.3s ease-in-out, visibility 0s;
+}
+#pd-menuslide.one .menupane:not( :first-child ) {
+    visibility: hidden;
+    transition: transform 0.3s ease-in-out, visibility 0s 0.3s;
+}
+
+#pd-menuslide.two .menupane:nth-child( 2 ) {
+    visibility: unset;
+    transition: transform 0.3s ease-in-out, visibility 0s;
+}
+#pd-menuslide.two .menupane:not( :nth-child( 2 ) ) {
+    visibility: hidden;
+    transition: transform 0.3s ease-in-out, visibility 0s 0.3s;
+}
+
+#pd-menuslide.three .menupane:nth-child( 3 ) {
+    visibility: unset;
+    transition: transform 0.3s ease-in-out, visibility 0s;
+}
+#pd-menuslide.three .menupane:not( :nth-child( 3 ) ) {
+    visibility: hidden;
+    transition: transform 0.3s ease-in-out, visibility 0s 0.3s;
+}

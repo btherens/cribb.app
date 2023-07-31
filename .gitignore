@@ -1,0 +1,15 @@
+config.php
+.version
+.DS_STORE
+**/.DS_Store
+.vscode/
+node_modules
+package-lock.json
+package.json
+postcss.config.js
+webpack.config.js
+credits.json
+dedication.json
+changelog.json
+/vendor/*
+/js/vendor/*

@@ -1,0 +1,7 @@
+/* web font for card styles */
+@font-face { font-family: 'Symbola'; src: url( '/asset/card.woff2' ); font-display: block; }
+/* interface text font */
+@font-face { font-family: 'VarelaRound'; src: url( '/asset/text.woff2' ); font-display: block; }
+
+/* built-in font variant */
+/* body.nowf .card:after { font-family: 'Apple Symbols'; } */

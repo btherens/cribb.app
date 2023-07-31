@@ -1,0 +1,15 @@
+/* safari 10.1+ fixes */
+@media not all and (min-resolution:.001dpcm) { @media {
+    /* apply letter-spacing mod to any faux-bolded text (disabled) */
+    /* #pulldown-menu { letter-spacing: -0.04em; } */
+    /* correct vertical number spacing */
+
+    .screen.left > .boardnum.vertical { padding-left: var(--peghole-spacing); }
+    .screen.left > .boardnum.vertical:first-child { padding-left: 0; }
+    .screen.right > .boardnum.vertical { padding-right: var(--peghole-spacing); }
+    .screen.right > .boardnum.vertical:last-child { padding-right: 0; }
+
+    /* correct layering bugs during animation */
+    .tactile > input[type=text]:not(:focus) { border-radius: 0 calc(0.75em/0.7) calc(0.75em/0.7) 0; }
+    .tactile > input[type=text]:focus { transition: background 150ms cubic-bezier(0, 0, 0.58, 1), width 150ms cubic-bezier(0, 0, 0.58, 1), font-size 150ms cubic-bezier(0, 0, 0.58, 1), border-radius 0s ease 150ms; }
+} }

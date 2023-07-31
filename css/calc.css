@@ -1,0 +1,16 @@
+/* calculated properties */
+* {
+    /* use viewport units by default, fallback to static viewport units */
+    --vh-unit: 1vh;
+    --vw-unit: 1vw;
+    /* derived scale values are proportionate to the responsive scale factor */
+    --cardfan-eff-scale:    calc(var(--cardfan-scale) * var(--scale-factor));
+    --cardspread-eff-scale: calc(var(--cardspread-scale) * var(--scale-factor));
+    --buttonfont-eff-scale: calc(var(--buttonfont-scale) * var(--scale-factor));
+}
+/* use dynamic viewport units if browser supports it */
+@media (min-height: 1dvh) { * {
+    /* include safe-area-inset values alongside dynamic viewport units to use dynamic values in most cases with some safe area padding in extreme cases */
+    --vh-unit: min(calc( 1dvh - ( ( env(safe-area-inset-top) + env(safe-area-inset-bottom) ) / 100 ) ),1vh);
+    --vw-unit: 1dvw;
+} }

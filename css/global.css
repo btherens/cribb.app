@@ -1,0 +1,44 @@
+/* global styles */
+* {
+    /* padding and border are included in element width / height */
+    box-sizing: border-box;
+    /* default font */
+    font-family: ui-rounded, VarelaRound, ui-sans-serif, system-ui, sans-serif;
+    /* disable tap target highlighting */
+    -webkit-tap-highlight-color: transparent;
+    font-weight: inherit;
+    /* cursor: default; */
+}
+/* disallow user-selection excepting inputs */
+*:not(input) {
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+    -webkit-touch-callout: none; /* iOS Safari */
+}
+/* disable outline on focus for any elements in page */
+*:focus { outline: none; }
+/* apply screen dimensions to html and body to assist with scroll-less window in ios mobile */
+html, body {
+    /* fill screen */
+    height: calc( 100 * var(--vh-unit) );
+    width: 100%;
+    /* hide overflow content */
+    overflow: hidden;
+}
+body {
+    /* background color */
+    background-color: var(--boardcolor);
+    /* use safe area variables for padding on left and right. top and bottom env variables are used to fill screen height */
+    padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
+    /* no margins on display edge */
+    margin: 0;
+    /* extend screen height to full window height */
+    display: flex;
+    flex-direction: column;
+    /* disable zoom */
+    touch-action: pan-y;
+    /* fix position to address landscape scrolling on ios */
+    position: fixed;
+    /* support fast-tap behavior in fullscreen safari web apps */
+    touch-action: manipulation;
+}

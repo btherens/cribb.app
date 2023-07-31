@@ -1,0 +1,49 @@
+/* dimension layout changes */
+/* screen elements */
+/* disable margins at small sizes */
+@media (min-aspect-ratio: 1/2) and (max-aspect-ratio: 3/2) {
+    @media (max-height: 500px) { #plyr-block > div:nth-child(2) { margin-bottom: .25em; } }
+    @media (max-height: 250px) { .game-container { padding: 0.2em; } }
+}
+
+/* widescreen layout */
+@media (min-aspect-ratio: 101/100) {
+    /* expand screen across width axis instead of height axis */
+    .game-container { flex-direction: row; }
+    /* center  */
+    .game-container > div { flex: 50%; }
+
+
+    /* expand cardsrow vertically */
+    .cardsrow {
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    /* flip layout flow in cardsrow */
+    /*
+    .cardsrow { transform: rotate(180deg); }
+    .cardsrow > div { transform: rotate(180deg); }
+    */
+
+    .cardsrow > div:nth-child(n) { width: 100%; }
+
+    /* remove left and right margins if in middle of screen */
+    /* #neutral-block > .cardsrow { margin: 2em 0; } */
+    /* */
+    #plyr-block {
+        display: flex;
+        flex-direction: column;
+    }
+    #plyr-block > div:first-child { flex-grow: 1; }
+    /* widescreen menu height */
+    #pulldown-menu.show { height: calc(5em + 1.825rem); }
+
+    /* shift hamburger button to right side */
+    /* #pd-hamburger > div { left: calc(50% - var(--boardwidth) / var(--pulldown-scale)); } */
+    #pd-button { justify-content: right; }
+
+    /* radial-menu selections rotate to right side */
+    /* .radial-menu > ul {  --menu-radial-showoffset: 180deg; } */
+
+    /* label.tactile { margin-bottom: 0; } */
+}

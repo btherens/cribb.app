@@ -1,0 +1,15 @@
+/* draggable surface */
+#dragmap {
+    position: fixed;
+    display: none; /* block; */
+    width: calc( 100 * var(--vw-unit) );
+    height: calc( 100 * var(--vh-unit) );
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: transparent;
+}
+
+/* enable dragmap when necessary */
+#dragmap.enable { display: block; }

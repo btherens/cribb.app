@@ -1,0 +1,93 @@
+/* top and bottom boards */
+.screen.top, .screen.bottom {
+    width: 100%;
+    height: var(--boardwidth);
+    /* stretch whitespace to fill div */
+    display: flex;
+    /* flex-direction: column; */
+    justify-content: space-between;
+}
+
+.screen.mid {
+    /* fill entire screen width */
+    width: 100%;
+    /* flex: flex-grow on | flex-shrink off | flex-basis auto (item is sized according to its width and height, but also grows and shrinks to fit the container.) */
+    flex: 1 0 auto;
+}
+.screen.mid  > * {
+    /* display: inline-block; */
+    float: left;
+}
+.screen.left, .screen.right {
+    /* stretch div to full height */
+    height: 100%;
+    /* width */
+    width: var(--boardwidth);
+    /* stretch whitespace to fill div */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#mainscreen {
+    /* padding to make room for pulldown */
+    margin-top: var(--boardwidth);
+    /* fill entire display (minus widths and heights of .left .right .top .bottom borders) */
+    height: calc(100% - var(--boardwidth));
+    /* fill screen width */
+    width: calc(100% - var(--boardwidth) * 2);
+    border-radius: 1.1em;
+    background-color: var(--tablecolor);
+    /* border shadow */
+    box-shadow: 0 0 1.2em rgba(0, 0, 0, 0.3) inset;
+}
+.game-container {
+    height: 100%;
+    width: 100%;
+}
+
+/* gameboard styles */
+
+/* adjust corner margins */
+/* top left corner */
+/* pin upper board elements to left corner  */
+.screen.top { padding-left: 0.25em; }
+
+/* shift left border board elements up into upper left corner */
+/* tall layout */
+.screen.left > div:first-child { margin-top: calc(0em - (var(--boardnum-width) + (var(--boardwidth) - var(--boardnum-width)) / 2 )); }
+/* square layout */
+@media (min-aspect-ratio: 3/4) {
+    .screen.left > div:nth-child(5) { margin-top: calc(0em - (var(--boardnum-width) + (var(--boardwidth) - var(--boardnum-width)) / 2 )); }
+}
+/* wide layout */
+@media (min-aspect-ratio: 4/3) {
+    .screen.left > div:nth-child(9) { margin-top: calc(0em - (var(--boardnum-width) + (var(--boardwidth) - var(--boardnum-width)) / 2 )); }
+}
+
+/* top right corner */
+/* pin right of upper border board elements to upper right corner (with the help of justify-content: space-between) */
+.screen.top > div:last-child { margin-right: calc((var(--boardwidth) - var(--boardnum-width)) / 2 );}
+.screen.right > div:first-child { margin-top: calc(0em - (var(--boardnum-width) + (var(--boardwidth) - var(--boardnum-width)) / 2 )); }
+/* lower right corner */
+/* tall layout */
+.screen.right > div:last-child { margin-bottom: calc(0em - (var(--boardnum-width) + (var(--boardwidth) - var(--boardnum-width)) / 2 )); }
+/* square layout */
+@media (min-aspect-ratio: 3/4) {
+    .screen.right > div:nth-last-child(5) { margin-bottom: calc(0em - (var(--boardnum-width) + (var(--boardwidth) - var(--boardnum-width)) / 2 )); }
+}
+/* wide layout */
+@media (min-aspect-ratio: 4/3) {
+    .screen.right > div:nth-last-child(9) { margin-bottom: calc(0em - (var(--boardnum-width) + (var(--boardwidth) - var(--boardnum-width)) / 2 )); }
+}
+.screen.bottom { padding-right: 0.5em; }
+
+/* lower left corner */
+/* shift the start position in lower left corner from left side into the bottom board */
+.screen.left > div:last-child  { margin-bottom: calc(0em - var(--peghole-diameter) - var(--peghole-spacing) / 2); }
+/* set padding of bottom left board to the vertical board width, and then subtract the same amount as lower left margin from above */
+.screen.bottom { padding-left: calc(var(--boardwidth) - var(--peghole-diameter) - var(--peghole-spacing) / 2); }
+
+/* horizontal styles*/
+/*
+.screen.top > div, .screen.bottom > div { float: left; }
+*/

@@ -1,0 +1,689 @@
+/* basic ui styles */
+button, input {
+    font-size: inherit;
+    font-family: inherit;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    border: 0;
+    padding: 0;
+    vertical-align: middle;
+    text-decoration: none;
+    color: unset;
+    background-color: unset;
+}
+input[type=checkbox] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+    overflow: hidden;
+}
+input[type=text] { font-family: ui-monospace, monospace, sans-serif; }
+
+span, h3 {
+    margin: 0;
+    padding: 0;
+    cursor: default;
+}
+/* ensure spans inside buttons don't change button cursor style */
+button span {
+    cursor: pointer;
+}
+
+.mono {
+    font-family: ui-monospace, monospace, sans-serif;
+}
+
+svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.qr-container {
+    width: calc(100% - 2em);
+    width: calc(min(100% - 2em,60*var(--vh-unit)));
+    width: calc(min(100% - 2em,100 * var(--vh-unit) - 26rem));
+    margin: 0 1em;
+    /* support fade-in */
+    transition: opacity 0.5s ease-out;
+    opacity: 0;
+}
+/* border around canvas */
+.qr-container > canvas {
+    /* border: solid var(--pegholecolor) 0.5em; */
+    box-shadow: 0 0 0 0.25em var(--pegholecolor);
+    border-radius: 2%;
+}
+.qr-container.visible { opacity: 1; }
+
+@media (min-aspect-ratio: 101/100) { .qr-container {
+    width: calc(min(100% - 2em,100 * var(--vh-unit) - 10rem));
+} }
+canvas {
+    width: 100%;
+    object-fit: contain;
+}
+
+
+/* variables */
+.tactile {
+    /* width of button lines (non-scaling) */
+    --btn-outline-scale: 0.25rem;
+    /* shadow */
+    --btn-shadow: rgba(0,0,0,0.2);
+}
+
+.tactile {
+    width: 100%;
+    color: var(--btn-outline);
+    /* disable default background */
+    /* background: var(--btn-background-1); */
+    border: var(--btn-outline-scale) solid var(--btn-outline);
+    display: inline-block;
+    border-radius: 0.75em;
+    text-align: center;
+    margin: 0;
+}
+.tactile, .tactile:not( :has( input:disabled ) ):not( :has( .notebox ) ) * {
+    cursor: pointer;
+}
+.tactile:disabled, .tactile:has( input:disabled ), .tactile input:disabled, .tactile.header {
+    cursor: default;
+}
+/* add a margin to top of tactile ui */
+.tactile.topmargin {
+    margin-top: 1em;
+}
+.tactile.botmargin {
+    margin-bottom: 1em;
+}
+/* widescreen and low height */
+@media (min-aspect-ratio: 101/100) and (max-height: 400px) { .tactile.topmargin {
+    margin-top: 0.4em;
+} }
+
+/* surround tactile ui element with vertical margin */
+.tactile.splitmargin {
+    margin: 0.125rem 0;
+}
+.tactile.botmargin {
+    margin-bottom: 0.625rem;
+}
+
+/* label with input inside */
+label.tactile {
+    color: var(--btn-background-1);
+    background: var(--btn-outline);
+    /* margin: 1em 0; */
+    line-height: 1.8em;
+    overflow: hidden;
+}
+label.tactile > * {
+    /* float everything to right */
+    float: right;
+    /* shrink to 70% */
+    font-size: 0.7em;
+}
+label.tactile > input {
+    height: 100%;
+    width: 75%;
+    color: var(--btn-outline);
+    background: var(--btn-background-1);
+    margin-left: 0.2em;
+    text-align: center;
+    transition: background 150ms cubic-bezier(0, 0, 0.58, 1), width 150ms cubic-bezier(0, 0, 0.58, 1), font-size 150ms cubic-bezier(0, 0, 0.58, 1);
+}
+/* non-text inputs are rounded on both sides */
+.tactile > input[type=checkbox], .tactile > input[type=range] { border-radius: calc(0.75em/0.7); }
+label.tactile > input[type=checkbox] {
+    width: calc(2*(2em / 0.7 - 2 * var(--btn-outline-scale)));
+    background-color: var(--btn-back);
+    /* avoid clipping checkbox handle on container edges */
+    z-index: 1;
+}
+
+label.tactile > input[type=checkbox]:before {
+    display: block;
+    position: absolute;
+    width: calc(2em / 0.7 - 2 * var(--btn-outline-scale));
+    height: calc(2em / 0.7 - 2 * var(--btn-outline-scale));
+    background: var(--btn-control-color);
+    left: 0;
+    border-radius: calc(0.75em/0.7);
+    line-height: calc(1.8em/0.7);
+    color: var(--btn-outline);
+    white-space: nowrap;
+    box-shadow: 0 0.1em 0.2em rgba(0,0,0,0.2);
+    transition: left cubic-bezier(0.3, 1.5, 0.7, 1) 0.2s;
+}
+label.tactile > input[type=checkbox]:disabled:before {
+    background: var(--btn-control-color-disabled);
+}
+/* default checkbox - on / off */
+label.tactile > input[type=checkbox]:before {
+    content: 'on off';
+    /* word1 position */
+    text-indent: -1.84em;
+    /* word2 position */
+    word-spacing: 3.67em;
+}
+/* color checkbox - red / blue */
+label.tactile > input[type=checkbox].color:before {
+    content: '';
+}
+label.tactile > input[type=checkbox].color {
+    background-color: var(--boardbluecolor);
+}
+label.tactile > input[type=checkbox].color:checked {
+    background-color: var(--cardredcolor);
+}
+label.tactile > input[type=checkbox]:checked {
+    /* slider fill color */
+    background-color: var(--tablecolor);
+    /* slider fill text */
+    color: var(--btn-control-color);
+}
+
+label.tactile > input[type=checkbox]:checked:before {
+    left: calc(2em / 0.7 - 2 * var(--btn-outline-scale));
+    /* slider fill text */
+    color: var(--btn-control-color);
+}
+
+/* smaller label size */
+label.tactile > div.small { font-size: 0.5em; }
+
+label.tactile > input::placeholder {
+    color: var(--btn-outline);
+    opacity: 0.7;
+}
+label.tactile > input:focus::placeholder {
+    color: transparent;
+}
+/* change background of input when not validating */
+label.tactile > input:invalid { background: var(--btn-back); }
+/* label text color  */
+label.tactile:has( > input:invalid ) { color: var(--btn-back); }
+
+label.tactile > input[type=text]:focus {
+    cursor: text;
+    color: var(--btn-background-1);
+    background: rgb(255, 255, 255);
+    color: #000;
+    width: 100%;
+    font-size: 1em;
+}
+
+.button.tactile > button {
+    transform: translate(0rem, -0.75rem);
+    transition: transform  150ms cubic-bezier(0, 0, 0.58, 1),
+                background 150ms cubic-bezier(0, 0, 0.58, 1),
+                height     200ms ease;
+}
+
+.button.tactile > button {
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+    outline: var(--btn-outline-scale) var(--btn-outline) solid;
+    /* box-shadow: 0 0 0 var(--btn-outline-scale) var(--btn-outline), 0 0.625rem 8px 0 var(--btn-shadow); */
+    border-radius: 0.75em;
+    background: var(--btn-background-1);
+}
+.button.tactile {
+    background: var(--btn-back);
+    /*
+    box-shadow: 0 0.625rem 8px 0 var(--btn-shadow);
+    */
+}
+
+.button.tactile > button::before {
+    position: absolute;
+    z-index: -1;
+    content: "";
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: 0 0.625rem 8px 0 var(--btn-shadow);
+    border-radius: calc(0.75em - var(--btn-outline-scale));
+    transform: translate(0, 0.75rem);
+    transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
+}
+
+.button.tactile > button:hover,
+.button.tactile > button:focus
+{
+    background: var(--btn-background-2);
+    transform: translate(0, -0.5rem);
+}
+
+.button.tactile > button:hover::before,
+.button.tactile > button:focus::before
+{
+    box-shadow: 0 0.5rem 8px 0 var(--btn-shadow);
+    transform: translate(0, 0.5rem);
+}
+
+.button.tactile > button:active,
+.button.tactile > button:disabled
+{
+    /* hide button outline when depressed to avoid imperfect line overlaps */
+    outline: var(--btn-outline-scale) transparent solid;
+    transition: outline-color 75ms 75ms,
+                transform     150ms cubic-bezier(0, 0, 0.58, 1),
+                background    150ms cubic-bezier(0, 0, 0.58, 1),
+                height        200ms ease;
+    background: var(--btn-back);
+    transform: translate(0rem, 0rem);
+}
+
+.button.tactile > button:active::before,
+.button.tactile > button:disabled::before
+{
+
+    box-shadow: 0 0 var(--btn-shadow);
+    transform: translate(0, 0);
+}
+
+
+
+/* range slider styles */
+input[type=range] {
+    outline: 0;
+    border: 0;
+    margin: 0;
+    border: 0;
+    overflow: hidden;
+}
+label.tactile > input[type=range] {
+    background-color: var(--buttoncolor2);
+    --range-thumb-width: 2em;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    label.tactile > input[type=range] {
+        -webkit-appearance: none;
+    }
+    label.tactile > input[type=range]::-webkit-slider-runnable-track {
+        height: 100%;
+        -webkit-appearance: none;
+    }
+    label.tactile > input[type=range]::-webkit-slider-thumb {
+        width: var(--range-thumb-width);
+        -webkit-appearance: none;
+        height: 100%;
+        width: calc(2em / 0.7 - 2 * var(--btn-outline-scale));
+        height: calc(2em / 0.7 - 2 * var(--btn-outline-scale));
+        /*
+        height: calc(100% + 2px);
+        transform: translateY(-1px);
+        */
+        cursor: ew-resize;
+        /*
+        background: var(--btn-outline);
+        */
+        background-color: var(--btn-background-1);
+        background-color: var(--btn-control-color);
+        
+        border-radius: calc(0.75em/0.7);
+
+        position: relative;
+
+        /* thumb outline */
+        box-shadow: calc(-100vw) 0 0 calc(100vw - (var(--range-thumb-width)/2)) var(--btn-background-1), inset 0 0 0 0.2em var(--btn-outline);
+        box-shadow: 0 0.1em 0.2em rgba(0,0,0,0.2), calc(-100vw) 0 0 calc(100vw - (var(--range-thumb-width)/2)) var(--btn-background-1);
+    }
+}
+.header.tactile.board {
+    background-color: var(--pegholecolor);
+    color: var(--boardcolor);
+    border-radius: 0.75em 0.75em 0 0;
+}
+.list.tactile.board {
+    border: 0.1em solid var(--pegholecolor);
+    /* height: 3em; */
+    height: 3.1em;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    margin-top: -0.1em;
+    border-radius: 0;
+}
+/* 0 margin */
+/* if the preceding element is flexing */
+.fullscreen-flex-all  + .list.tactile.board,
+.fullscreen-flex-tall + .list.tactile.board,
+.fullscreen-flex-wide + .list.tactile.board,
+/* if the object is solo */
+.list.tactile.board.solo { margin-top: 0; }
+
+.header.list.tactile.board {
+    font-size: 0.5em;
+    height: 1.5em;
+    display: block;
+}
+
+div:first-child > .list.tactile.board:first-child {
+    border-radius: 0.75em 0.75em 0 0;
+}
+div:last-child > .list.tactile.board:last-child {
+    border-radius: 0 0 0.75em 0.75em;
+}
+.list.tactile.board.solo { border-radius: 0.75em; }
+
+@media (min-aspect-ratio: 101/100)
+{
+    .list.tactile.board:first-child { border-radius: 0 0.75em 0 0; }
+    div:first-child > .list.tactile.board:first-child { border-radius: 0.75em 0 0 0; }
+    div:only-child > .list.tactile.board:first-child { border-radius: 0.75em 0.75em 0 0; }
+    .list.tactile.board:last-child  { border-radius: 0 0 0 0.75em; }
+    div:last-child > .list.tactile.board:last-child { border-radius: 0 0 0.75em 0; }
+    div:only-child > .list.tactile.board:last-child { border-radius: 0 0 0.75em 0.75em; }
+    .list.tactile.board.solo { border-radius: 0.75em; }
+}
+
+.list.tactile.board > div:not(:first-child) {
+    box-shadow: -0.1em 0em 0em 0em var(--pegholecolor);
+    margin-left: 0.1em;
+}
+.listbox {
+    height: 100%;
+    width: calc(100% - 3.1em);
+    background-color: var(--btn-back);
+    /*
+    box-shadow: -0.1em 0em 0em 0em var(--pegholecolor);
+    margin-left: 0.1em;
+    */
+}
+/* .list.tactile.board items with .new get light highlights */
+.new > .listbox {
+    background-color: var(--btn-background-1);
+}
+
+.listbox > .name {
+    height: 40%;
+    width: 100%;
+    display: table;
+    white-space: nowrap;
+    text-align: left;
+}
+.listbox > .name:last-child {
+    height: 100%;
+}
+
+.listbox > .name > span {
+    font-family: ui-monospace, monospace, sans-serif; 
+    padding-left: 0.2em;
+    display: table-cell;
+    vertical-align: middle;
+    /* text-align: left; */
+    font-size: 0.6em;
+}
+.listbox > .name.rank > span {
+    background-color: var(--list-rank-color);
+    color: var(--btn-control-color);
+}
+/* .new > */
+.listbox > .name.rank > span {
+    background-color: var(--list-rank-new-color);
+}
+
+.listbox > .headrow {
+    height: 20%;
+    width: 100%;
+    display: table;
+    white-space: nowrap;
+    background-color: var(--pegholecolor);
+}
+
+.listbox > .headrow > span {
+    color: var(--btn-back);
+    font-size: 0.4em;
+    display: table-cell;
+    vertical-align: middle;
+    width: 50%;
+    height: 100%;
+    /* match padding */
+    padding-right: calc( 0.1em / 0.4 );
+}
+.listbox > .headrow > span:last-child {
+    padding-right: unset;
+}
+
+.listbox > .score {
+    box-shadow: 0em -0.1em  0em 0em var(--pegholecolor);
+    height: 40%;
+    height: calc(40% - 0.2em);
+    width: 100%;
+    display: table;
+    white-space: nowrap;
+}
+.listbox > .score > div {
+    display: table-cell;
+    vertical-align: middle;
+    width: 50%;
+    height: 100%;
+    padding-right: 0.1em;
+}
+/*
+.listbox.one > .name  > span,
+*/
+.listbox.one > .score > div:first-child,
+.listbox.two > .score > div:last-child {
+    background-color: var(--cardredcolor);
+    color: var(--btn-control-color);
+}
+/*
+.listbox.two > .name  > span,
+*/
+.listbox.two > .score > div:first-child,
+.listbox.one > .score > div:last-child {
+    /*
+    color: var(--boardbluecolor);
+    */
+    background-color: var(--cardcolor);
+    color: var(--btn-control-color);
+}
+
+.listbox > .score > div:not(:first-child) {
+    /* border-left: 0.1em solid var(--pegholecolor); */
+    box-shadow: -0.1em 0em 0em 0em var(--pegholecolor);
+    padding-right: unset;
+}
+
+.contextbox {
+    height: 100%;
+    width: 0;
+    box-shadow: none;
+    margin-left: 0;
+}
+
+.avatar.list {
+    height: 100%;
+    width: 3em;
+}
+.avatar.list         { background-color: var(--cardcolor); }
+.avatar.list.color   { background-color: var(--cardredcolor); }
+.avatar.list.nocolor { background-color: unset; }
+
+/* shrink avatar to re-balance in center around circle background */
+.avatar.list > svg {
+    height: 89.5%;
+}
+
+
+.notebox {
+    height: 100%;
+    width: 100%;
+    display: block;
+    background-color: var(--btn-background-1);
+    /* 1/2 border-radius of parent */
+    padding: 0.2375em 0.475em 0;
+    cursor: default;
+}
+.notebox * {
+    user-select: text;
+    -webkit-user-select: text; /* Safari */
+    -webkit-touch-callout: text; /* iOS Safari */
+}
+.notebox > span, .notebox > a {
+    text-align: left;
+    vertical-align: baseline;
+}
+.notebox > * {
+    width: 100%;
+    display: table;
+}
+.notebox > .head {
+    height: 25%;
+}
+.notebox > .author {
+    height: 11%;
+    font-size: 0.26em;
+}
+.notebox > .body {
+    height: 64%;
+    font-size: 0.435em;
+}
+.notebox > .body.small {
+    font-size: 0.36em;
+    padding-top: 0.055em;
+}
+/* list font size */
+.notebox > .body > li {
+    font-size: 0.8em;
+}
+.notebox > .head > a {
+    color: var(--btn-outline);
+    white-space: nowrap;
+    text-align: left;
+    font-family: ui-monospace, monospace, sans-serif; 
+    display: table-cell;
+    font-size: 0.55em;
+}
+@media ( max-width: 450px ) {
+    .notebox > .head > a.small {
+        font-size: 0.42em;
+        padding-top: 0.13em;
+    }
+}
+
+.notebox > .head > span {
+    display: table-cell;
+    text-align: right;
+    font-style: italic;
+    white-space: nowrap;
+    opacity: 0.8;
+    font-size: 0.3em;
+}
+
+.notebox > .noterow {
+    font-size: 0.5em;
+
+}
+.notebox > .noterow > * {
+    display: table-cell;
+}
+.notebox > .noterow > *:first-child {
+    text-align: left;
+}
+.notebox > .noterow > *:last-child {
+    text-align: right;
+}
+
+.textblock > a {
+    color: var(--pegholecolor);
+    text-decoration: underline;
+}
+.textblock > span {
+    color: var(--pegholecolor);
+}
+.textblock {
+    max-width: 16em;
+    margin: 0.5em 0;
+}
+.textblock > * {
+    font-size: 0.45em;
+    display: inline;
+}
+.textblock.large > * {
+    font-size: 0.6em;
+}
+
+.floattext {
+    position: absolute;
+    background-color: var(--tableaccent);
+    font-size: calc(0.3 * var(--cardspread-eff-scale));
+    z-index: 1;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 1em;
+    line-height: 1.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2);
+    width: calc(1 * var(--cardspread-eff-scale));
+    opacity: 1;
+    color: var(--textcolor);
+    transition: width 0.4s ease, opacity 0.4s ease, box-shadow 0.4s ease, color 0.4s ease 0.4s;
+}
+
+.floattext-container {
+    /* center floating style */
+    display:         flex;
+    justify-content: center;
+    align-items:     center;
+    /* float above other elements */
+    z-index:         2;
+}
+
+.opponent-crib .neutraltext.pin,
+.player-crib   .neutraltext.pin { align-items: end; }
+.player-crib   .neutraltext.pin { margin-bottom: 1em; }
+@media (min-aspect-ratio: 101/100) {
+    /* shift neutraltext to right pane */
+    .game-container .neutraltext, .game-container .neutraltext.pin {
+        align-items: start;
+        margin-bottom: unset;
+    }
+    .neutraltext.pin > *:first-child {
+        margin-top: calc( 1.1 * var(--cardspread-eff-scale));
+    }
+    .neutraltext:not( .pin ) {
+        transform: translateX(100%);
+    }
+}
+
+.floattext.count:has( > span:empty ) {
+    color: var(--tableaccent);
+}
+.floattext.wide1 { width: 4em; }
+.floattext.wide2 { width: 5.5em; }
+.floattext.wide3 { width: 8.6em; }
+.floattext.wide4 { width: 11em; }
+.floattext.wide5 { width: 12.6em; }
+
+
+.floattext span.soft    { color: var(--textcolor2);      }
+.floattext span.blue    { color: var(--boardbluecolor);  }
+.floattext span.red     { color: var(--boardredcolor);   }
+.floattext span.invalid { text-decoration: line-through; }
+
+.floattext.hide {
+    box-shadow: none;
+    width: 0;
+    opacity: 0;
+    color: var(--tableaccent);
+    transition: width 0.4s ease, opacity 0.2s ease, color 0.2s ease;
+}
+
+span.action-icon {
+    content: url(/asset/action-icon.svg);
+    height: 0.8em;
+}
