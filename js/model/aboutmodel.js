@@ -17,6 +17,18 @@ export default class AboutModel extends Model
         this.cachesize  = null;
         this.lssize     = null;
 
+        /* license text (full license text will be loaded from server) */
+        this.license    = [
+            /* default license */
+            {
+                title:       'cribb.app',
+                licensepath: '/LICENSE',
+                licenseurl:  '/LICENSE'
+            },
+            /* include any credits objects with a license path to load */
+            ...this.credits.filter( c => c?.licensepath )
+        ];
+
         /* privacy block definition */
         this.privacy    = [
             { header: 'summary' },
