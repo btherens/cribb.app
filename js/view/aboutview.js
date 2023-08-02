@@ -41,6 +41,13 @@ export default class AboutView extends View
         return this._createBlankViewWrapper( this.privacy, 'privacy' );
     }
 
+    createLicenseView()
+    {
+        this.license = this.create( 'div', { class: 'flex-container column width-1' } );
+        /* return a DOM view */
+        return this._createBlankViewWrapper( this.license, 'license' );
+    }
+
     displayAboutView( dedication, credits, privacy, changelog, sizeobj )
     {
         this.about.textContent = ''
@@ -50,8 +57,15 @@ export default class AboutView extends View
         /* credits */
         this.displayTextblock();
         this.displayList( this.about, [
+            /* header */
             this.create( 'div', { id: 'credits', class: 'list header tactile board' }, 'credits' ),
-            ...credits
+            /* list */
+            ...credits,
+            /* licenses */
+            this.create( 'div', {
+                class: 'list header tactile board',
+                onclick: () => this.handleRoute( `/about/license` )
+            }, 'license >' )
         ] );
 
         /* display privacy info */
@@ -61,6 +75,7 @@ export default class AboutView extends View
             this.create( 'div', { id: 'changelog', class: 'list header tactile board' }, 'privacy' ),
             /* list */
             ...privacy,
+            /* link to more privacy info */
             this.create( 'div', {
                 class: 'list header tactile board',
                 onclick: () => this.handleRoute( `/about/privacy` )
@@ -112,6 +127,14 @@ export default class AboutView extends View
         ] );
     }
 
+    displayLicenseView( license )
+    {
+        /* clear license view content */
+        this.license.textContent = '';
+        /* append license dom content to privacy view */
+        this.displayList( this.license, [ ...license ] );
+    }
+
     /* add a list dom object to view */
     displayList( view, arr )
     {
@@ -130,7 +153,7 @@ export default class AboutView extends View
         view.appendChild(
             this.create( 'div', { class: 'textblock' }, [
                 sUrl != null ? this.create( 'a', { target: '_blank', href: sUrl, onclick: e => e.stopPropagation() }, 'source code' ) : null,
-                this.create( 'span', 0, ( ( sUrl != null ? ' | ' : '' ) + new Date().getFullYear() + ( cname != null ? ' ' + cname : '' ) ) )
+                this.create( 'span', 0, ( ( sUrl != null ? ' | ' : '' ) + '© ' + new Date().getFullYear() + ( cname != null ? ' ' + cname : '' ) ) )
             ] )
         )
     }

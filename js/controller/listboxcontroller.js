@@ -50,10 +50,11 @@ export default class ListboxController extends Controller
         link,
         subheader,
         disclaimer,
-        body
+        body,
+        fitcontent
     ) =>
     {
-        return _view.createNoteBox( header, link, subheader, disclaimer, body )
+        return _view.createNoteBox( header, link, subheader, disclaimer, body, fitcontent )
     }
 
     static createHeader = (

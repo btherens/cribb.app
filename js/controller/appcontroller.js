@@ -311,6 +311,11 @@ export default class AppController extends Controller
             this.pushState( '/about/privacy', 'privacy' );
             view = this._about.createPrivacyView();
         }
+        else if ( 'license' == page )
+        {
+            this.pushState( '/about/license', 'license' );
+            view = this._about.createLicenseView();
+        }
         else
         {
             this.pushState( '/about', 'about' );

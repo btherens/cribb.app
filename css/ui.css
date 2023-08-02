@@ -355,6 +355,9 @@ label.tactile > input[type=range] {
     margin-top: -0.1em;
     border-radius: 0;
 }
+.list.tactile.board.fitcontent {
+    height: fit-content;
+}
 /* 0 margin */
 /* if the preceding element is flexing */
 .fullscreen-flex-all  + .list.tactile.board,

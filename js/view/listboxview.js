@@ -53,25 +53,23 @@ export default class ListboxView extends View
 
     static createHeader  = ( h ) => ListboxView.create( 'div', { class: 'list header tactile board' }, h );
 
-    static createNoteBox = ( h, u, a, d, b ) =>
+    static createNoteBox = ( header, url, author, disclaimer, body, fitcontent ) =>
     {
-        return ListboxView.create( 'div', { class: 'list tactile board' },
+        return ListboxView.create( 'div', { class: 'list tactile board' + ( fitcontent ? ' fitcontent' : '' ) },
             ListboxView.create( 'div', { class: 'notebox' }, [
-                ListboxView.create( 'div', {
-                    class: 'head'
-                }, [
+                ( header || url || disclaimer || author ) ? ListboxView.create( 'div', { class: 'head' }, [
                     ListboxView.create( 'a', {
-                        class:  h.length > 16 ? 'tiny' : h.length > 12 ? 'small' : '',
+                        class:  header?.length > 16 ? 'tiny' : header?.length > 12 ? 'small' : '',
                         target:  '_blank',
-                        href:    u,
+                        href:    url,
                         onclick: e => e.stopPropagation()
-                    }, h ),
-                    ListboxView.create( 'span', { class: 'disclaimer' }, d )
-                ] ),
-                ListboxView.create( 'span', { class: 'author' }, a ),
+                    }, header ),
+                    ListboxView.create( 'span', { class: 'disclaimer' }, disclaimer )
+                ] ) : null,
+                ( header || url || disclaimer || author ) ? ListboxView.create( 'span', { class: 'author' }, author ) : null,
                 ListboxView.create( 'span', { class: 'body' + ( (
-                    typeof b == 'string' ? ( b.length > 95 ) : ( b?.length > 2 )
-                ) ? ' small' : '' ) }, b )
+                    typeof body == 'string' ? ( body.length > 95 ) : ( body?.length > 2 )
+                ) ? ' small' : '' ) }, body )
             ] )
         )
     }
