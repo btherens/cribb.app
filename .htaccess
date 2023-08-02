@@ -26,12 +26,14 @@ RewriteRule ^/?(.*)$ /$1?%1%2 [L]
 # redirect styles.css to php
 RewriteRule ^css/style.css(.*)$ css/style.php [L,NC]
 
-# deliver asset/css/js/.version to client directly without routing through php application
+# deliver to client directly without routing through php application
 RewriteRule ^asset/? - [L,NC]
 RewriteRule ^css/? - [L,NC]
 RewriteRule ^js/? - [L,NC]
 RewriteRule ^dist/? - [L,NC]
 RewriteRule ^\.version$ - [L,NC]
+RewriteRule ^LICENSE$ - [L,NC]
+RewriteRule ^vendor/license/? - [L,NC]
 # exempt tls directory
 RewriteRule ^\.well-known/? - [L,NC]
 
