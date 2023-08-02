@@ -1,10 +1,10 @@
-#Online multiplayer cribbage
+# cribb.app - online multiplayer cribbage
 
 this project represents a proof of concept frontend javascript card game with server-side multiplayer matchmaking.
 
 improved documentation still to come!
 
-#CREDITS
+# CREDITS
 
 [Symbola Font](https://www.fontspace.com/symbola-font-f22021), v10.24, 2018/01/31.  
 Font is licensed as public domain and was provided for any personal or commercial use.  
