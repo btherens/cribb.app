@@ -22,9 +22,11 @@ export default class AboutController extends Controller
         author     = this.model.author,
         privacy    = this.model.privacy,
         changelog  = this.model.changelog,
+        license    = this.model.license,
         vabout     = this.view.about,
         vchangelog = this.view.changelog,
         vprivacy   = this.view.privacy,
+        vlicense   = this.view.license,
         cachesize  = this.model.cachesize,
         lssize     = this.model.lssize
     ) => {
@@ -99,6 +101,24 @@ export default class AboutController extends Controller
             );
             this.view.displayFooter( vprivacy, url, author );
         }
+        if ( vlicense )
+        {
+            /* simple text to dom renderer */
+            const text2dom = text => text?.split( /\n\n/ )
+                .map( line => this.view.create( 'p', {},
+                        /* test for length of line */
+                        line.split( /\n/ )[ 0 ].trim().length <= 64
+                            /* lines that are short enough will be parsed */
+                            ? this.model.sinterleave( line.split( /\n/ ).map( line => this.view.create( 'span', {}, line.trim() ) ), this.view.create( 'br' ) )
+                            /* remove any newlines and allow wrapping */
+                            : line.replace( /\n/, ' ' ).trim()
+                    )
+                );
+            this.view.displayLicenseView( license.map( l => ListboxController.createNoteBox( l.title, l.licenseurl ?? l.url, null, l?.disclaimer, text2dom( l?.fulllicense ), true ) ) );
+            this.view.displayFooter( vlicense, url, author );
+            /* load licenses from server if not loaded yet */
+            if ( !license.filter( l => l?.fulllicense ).length ) { this.fetchLicenses() }
+        }
     }
 
     /* return a new about view */
@@ -160,6 +180,11 @@ export default class AboutController extends Controller
     _scanLsSize = () => this._promise().then( () => this.model.lssize = this.model.lsSize() )
     /* run all storage scans and trigger model change upon success */
     scanAllStorageSize = ( ) => Promise.all( [ this._scanSwSize(), this._scanLsSize() ] ).then( () => this.onModelChanged() )
+
+    /* get text from server paths and trigger update events when promises complete */
+    fetchLicenses = ( license = this.model.license ) => Promise.all( license.map(
+        ( l, i, a ) => fetch( sfetch.request( l.licensepath ) ).then( response => response.text() ).then( text => a[ i ].fulllicense = text )
+    ) ).then( () => this.onModelChanged() );
 
     /* bind a callback event on an element to run if it scrolls into view */
     _bindOnBecomeVisible = ( el, c ) =>
