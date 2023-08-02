@@ -30,4 +30,10 @@ class AboutController extends Controller
         $appload->index();
     }
 
+    public function license(): void
+    {
+        $appload = new ApploaderController( 'index', 'license' );
+        $appload->index();
+    }
+
 }

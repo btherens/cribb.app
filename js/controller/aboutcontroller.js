@@ -130,6 +130,15 @@ export default class AboutController extends Controller
         return view;
     }
 
+    createLicenseView( )
+    {
+        /* create view */
+        const view = this.view.createLicenseView();
+        /* fully populate view */
+        this.onModelChanged();
+        return view;
+    }
+
     _createSizeNote = ( cachesize, lssize ) =>
     {
         /* cast bytes to string in kilobytes */
