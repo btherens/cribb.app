@@ -353,7 +353,7 @@ export default class AppController extends Controller
     handleOpenIdentityCreate = ( ) =>
     {
         /* redirect if we are logged in */
-        if ( this._identity.name ) { this.route( `/identity/update`, true ); return; }
+        if ( null != this._identity.name ) { this.route( `/identity/update`, true ); return; }
         /* lock and skip routing if we're at the about view */
         if ( window.location.pathname.startsWith( `/about` ) ) { this.lockMenu(); return; }
         /* clear out views */
@@ -380,7 +380,7 @@ export default class AppController extends Controller
     handleOpenIdentityUpdate = ( ) =>
     {
         /* redirect if we are not logged in */
-        if ( !this._identity.name ) { this.route( `/identity/create`, true ); return; }
+        if ( null == this._identity.name ) { this.route( `/identity/create`, true ); return; }
         const view = this._identity.createUpdateView();
         /* update path */
         this.pushState( `/identity/update`, 'update identity' );
@@ -432,7 +432,7 @@ export default class AppController extends Controller
                 else { this.route( '/g/' + o.gid ) }
             }
             /* if the request failed but we appear to be logged on */
-            else if ( this._identity.name ) { this.route( '/', true ) }
+            else if ( null != this._identity.name ) { this.route( '/', true ) }
         } );
     }
 
@@ -460,7 +460,7 @@ export default class AppController extends Controller
                 else { this.route( '/g/' + g.g, true ) }
             }
             /* if the request failed but we appear to be logged on */
-            else if ( this._identity.name ) { this.route( '/', true ) }
+            else if ( null != this._identity.name ) { this.route( '/', true ) }
         } );
     }
 
@@ -504,7 +504,7 @@ export default class AppController extends Controller
                 this.remindAppInstall();
             }
             /* if the request failed but we appear to be logged on */
-            else if ( this._identity.name ) { this.route( '/', true ) }
+            else if ( null != this._identity.name ) { this.route( '/', true ) }
         } );
     }
 
@@ -686,7 +686,7 @@ export default class AppController extends Controller
     servicesConnect = () =>
     {
         /* don't do anything if we aren't logged in */
-        if ( !this._identity.name ) { this.route( '/identity/create' ); return; }
+        if ( null == this._identity.name ) { this.route( '/identity/create' ); return; }
         /* reconnect the sync services */
         /* sync when site is foregrounded */
         this.initVisibilitySync();
