@@ -102,3 +102,49 @@
     /* top margin to counteract raised button style */
     margin: 1.5rem 0 0;
 }
+
+#titleintro {
+    position: fixed;
+    z-index: 10;
+    display: block;
+    width: calc( 100 * var(--vw-unit) );
+    height: calc( 100 * var(--vh-unit) );
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--boardcolor);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    animation: fadeout 1s ease-in     6s 1 forwards;
+}
+#titleintro span {
+    color:      var(--pegholecolor);
+    display:    block;
+    text-align: center;
+    opacity: 0;
+}
+#titleintro span:first-child {
+    font-size:   3.8em;
+    font-weight: bold;
+    animation: fadein  2s ease-in-out 1s 1 forwards,
+               fadeout 1s ease-in     5s 1 forwards;
+}
+#titleintro span:last-child {
+    font-size: 1.3em;
+    animation: fadein  2s ease-in-out 2s 1 forwards,
+               fadeout 1s ease-in     5s 1 forwards;
+}
+
+@keyframes fadein {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes fadeout {
+    0%   { opacity: 1; pointer-events: none; }
+    100% { opacity: 0; pointer-events: none; }
+}
