@@ -97,12 +97,12 @@ export default class AppController extends Controller
 
     launch()
     {
+        /* trigger startup events if we're not starting from the about view */
+        if ( !window.location.pathname.toLowerCase().startsWith( '/about' ) ) this.playIntro().then( () => this.remindCookies() );
         /* route application to proper place */
         this.route();
         /* connect to service and establish events */
         this.servicesConnect();
-
-        this.remindCookies();
         /* detect online status (disabled) */
         //this._updateOnlineStatus();
     }
@@ -149,6 +149,21 @@ export default class AppController extends Controller
             }, 1500 )
         }
     }
+
+    playIntro = ( force = this.model.doPlayIntro && null == this._identity.name ) => this._promise()
+        .then( () =>
+        {
+            if ( force )
+            {
+                const intro = this.view.createIntro();
+                return this._delay( 7500 ).then( () =>
+                {
+                    intro.remove();
+                    this.model.doPlayIntro = false;
+                } )
+            }
+        } )
+
 
     remindAppInstall = ( force = !this.model.installappreminder ) =>
     {
