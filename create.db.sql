@@ -553,16 +553,22 @@ DELIMITER $$
 /* create a new game, link calling id, and return gid for lookups */
 CREATE FUNCTION `createGame`( identity int(11), opp int(11) ) RETURNS int(11)
 BEGIN
-    DECLARE gid int(11);
+    DECLARE gid     int(11);
+    DECLARE setting int(11);
     /* create game record */
     INSERT INTO `game` ( `timestamp` ) SELECT CURRENT_TIMESTAMP;
     /* keep track of created id */
-    SELECT last_insert_id() into gid;
+    SELECT last_insert_id() INTO gid;
     /* attach identity id to game */
     INSERT INTO `game_activity` ( `game_id`, `identity_id`, `round`, `type` ) SELECT gid, identity, -1, 'L';
     /* attach opponent id to game if available */
     IF opp IS NOT NULL THEN
     INSERT INTO `game_activity` ( `game_id`, `identity_id`, `round`, `type` ) SELECT gid, opp,      -1, 'L';
+    END IF;
+    /* copy last setting */
+    SELECT       `value` INTO setting FROM `game_activity` WHERE identity = `identity_id` AND `type` = 'S' ORDER BY `timestamp` DESC, `id` DESC LIMIT 1;
+    IF           setting IS NOT NULL THEN
+    INSERT INTO `game_activity` ( `game_id`, `identity_id`, `round`, `type`, `value` ) SELECT gid, identity, -1, 'S', setting;
     END IF;
     /* return game id */
     RETURN gid;
