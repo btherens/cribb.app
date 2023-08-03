@@ -34,6 +34,8 @@ export default class LobbyView extends View
             onpointerdown: e => e.stopPropagation(),
             oninput: this.handleUpdateRank
         } ) );
+        /* ensure button is enabled */
+        this.button.disabled = false;
 
         /* content boxes */
         this.box1 = this.create( 'div', { class: 'flex-container column width-1 fullscreen-flex-tall' }, [

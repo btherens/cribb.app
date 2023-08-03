@@ -44,16 +44,21 @@ export default class LobbyController extends Controller
     ) => {
         /* display blank screen */
         this.view.displayLobby();
+        /* update view elements */
+        this.view.checkColor = liveColor;
+        this.view.checkRank  = liveRank;
         /* exit now if we don't have a game id loaded */
         if ( !gid ) { return }
         /* set header accordingly */
         this.view.header.textContent = newmode ? 'new game'   : 'challenge!';
         this.view.button.textContent = newmode ? 'challenge!' : 'begin game';
-        /* update view elements */
-        this.view.checkColor = liveColor;
-        this.view.checkRank  = liveRank;
         /* present qr if newmode */
-        if ( newmode ) { this._displayQr() }
+        if ( newmode )
+        {
+            /* disable challenge button if not supported */
+            if ( !navigator.share ) { this.view.button.disabled = true }
+            this._displayQr();
+        }
         /* render accept screen variant */
         else
         {
@@ -110,6 +115,15 @@ export default class LobbyController extends Controller
         {
             this.desetLobbySetting( null );
         }
+    }
+
+    /* disable all inputs to prevent issues */
+    disableInputs = ( disable = true ) =>
+    {
+        /* disable switches */
+        this.view.inputRank.children[ 0 ].disabled  = disable;
+        this.view.inputColor.children[ 0 ].disabled = disable;
+        this.view.button.disabled = disable;
     }
 
     handleClickButton = (
@@ -197,9 +211,6 @@ export default class LobbyController extends Controller
         /* fade-in qr (if not visible already) */
         setTimeout( () => this.view.showQr = true, 200 );
 
-        /* disable challenge button if we can't use the share method */
-        if ( !navigator.share ) { this.view.button.disabled = true }
-
         /* update settings on server (if necessary) */
         this.updateSetting();
     }
@@ -254,7 +265,11 @@ export default class LobbyController extends Controller
         /* force clear the model if we're loading a new lobby and the previous lobby is an accept view */
         if ( newlobby && oldchallenge ) { this.clear() }
         /* preload lobby if view is new */
-        if ( newlobby ) { this.onModelChanged() }
+        if ( newlobby )
+        {
+            this.onModelChanged();
+            this.disableInputs();
+        }
         /* return view */
         return view;
     }
