@@ -53,7 +53,12 @@ export default class LobbyController extends Controller
         this.view.header.textContent = newmode ? 'new game'   : 'challenge!';
         this.view.button.textContent = newmode ? 'challenge!' : 'begin game';
         /* present qr if newmode */
-        if ( newmode ) { this._displayQr() }
+        if ( newmode )
+        {
+            /* disable challenge button if not supported */
+            if ( !navigator.share ) { this.view.button.disabled = true }
+            this._displayQr();
+        }
         /* render accept screen variant */
         else
         {
@@ -205,9 +210,6 @@ export default class LobbyController extends Controller
         qr.append( dom );
         /* fade-in qr (if not visible already) */
         setTimeout( () => this.view.showQr = true, 200 );
-
-        /* disable challenge button if we can't use the share method */
-        if ( !navigator.share ) { this.view.button.disabled = true }
 
         /* update settings on server (if necessary) */
         this.updateSetting();
