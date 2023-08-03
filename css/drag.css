@@ -1,6 +1,7 @@
 /* draggable surface */
 #dragmap {
     position: fixed;
+    z-index: 3;
     display: none; /* block; */
     width: calc( 100 * var(--vw-unit) );
     height: calc( 100 * var(--vh-unit) );
@@ -13,3 +14,6 @@
 
 /* enable dragmap when necessary */
 #dragmap.enable { display: block; }
+
+/* push pulldown menu behind cards if dragging is happening */
+#dragmap.enable ~ .screen.mid > #pulldown-menu { z-index: 1; }
