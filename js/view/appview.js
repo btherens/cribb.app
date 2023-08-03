@@ -22,6 +22,16 @@ export default class AppView extends View
         this._notifyspan  = this._notifybar.children[ 0 ];
     }
 
+    createIntro = () =>
+    {
+        const introdiv = this.create( 'div', { id: 'titleintro' }, this.create( 'div', {}, [
+            this.create( 'span', {}, 'cribb.app' ),
+            this.create( 'span', {}, 'play cribbage with friends!' )
+        ] ) );
+        document.body.appendChild( introdiv );
+        return introdiv;
+    }
+
     hideNotify = () =>
     {
         /* remove transition class */
