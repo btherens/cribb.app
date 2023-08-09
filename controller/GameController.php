@@ -488,7 +488,7 @@ class GameController extends Controller
                 else
                 {
                     /* get player hands */
-                    $response = array_merge( $response, $this->_getDealState( $game, true, $st === 'count1', $this->_model->getGate() == 3 ) );
+                    $response = array_merge( $response, $this->_getDealState( $game, true, 'count1' === $st, 3 == $this->_model->getGate() ) );
                     /* continue to play state */
                     if ( in_array( $st, [ 'play1', 'count1', 'count2', 'count3' ] ) )
                     {
