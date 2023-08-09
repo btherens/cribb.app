@@ -488,7 +488,7 @@ class GameController extends Controller
                 else
                 {
                     /* get player hands */
-                    $response = array_merge( $response, $this->_getDealState( $game, true, $st === 'count1', $this->_model->getGate() == 3 ) );
+                    $response = array_merge( $response, $this->_getDealState( $game, true, 'count1' === $st, 3 == $this->_model->getGate() ) );
                     /* continue to play state */
                     if ( in_array( $st, [ 'play1', 'count1', 'count2', 'count3' ] ) )
                     {
@@ -694,7 +694,7 @@ class GameController extends Controller
         return [
             'l'   => $level,
             /* scan for count total */
-            'ct'  => $this->_findScores( $this->_returnHandDetail( [ ...$counthand, $s ], $d ) ),
+            'ct'  => $this->_findScores( $this->_returnHandDetail( [ ...$counthand, $s ], $d ), 2 == $level ),
             /* the scores each player has counted */
             'phc' => $count[ 0 ],
             'ohc' => $count[ 1 ],
@@ -754,7 +754,7 @@ class GameController extends Controller
     }
 
     /* analyze a hand for scores and return  */
-    protected function _findScores( array $h ): array
+    protected function _findScores( array $h, bool $cribhand = false ): array
     {
         /* begin with empty result */
         $nobs    = [];
@@ -790,8 +790,8 @@ class GameController extends Controller
             if ( $n >= 3 && $this->_isRun( $v )                       ) { $run[]     = $this->_returnScoreObj( 'run'   . $n, $c, $z ); }
             /* flush if no flush is recorded so far and card suits match */
             if (
-                /* check if we're looking at cards in hand, or all 5 */
-                ( $n == 4 && ( count( array_intersect( $i, $this->_indexMap( array_slice( $h, 0, 4 ) ) ) ) == 4 ) || $n == 5 )
+                /* check if we're looking at cards in hand (non crib-hands only), or all 5 */
+                ( $n == 4 && !$cribhand && ( count( array_intersect( $i, $this->_indexMap( array_slice( $h, 0, 4 ) ) ) ) == 4 ) || $n == 5 )
                 /* cards match and no flush has been recorded yet */
                 && !count( $flush ) && $this->_isMatch( $s )
             )
@@ -1232,7 +1232,7 @@ class GameController extends Controller
         $s           = $this->_model->getStarter();
         $counthand   = $this->_returnCountHand( $level, $g->iscrib, $ph, $oh, $ch );
         $savecount   = $this->_model->getCount();
-        $allscore    = $this->_findScores( $this->_returnHandDetail( [ ...$counthand, $s ], $d ) );
+        $allscore    = $this->_findScores( $this->_returnHandDetail( [ ...$counthand, $s ], $d ), 2 == $level );
         /* resolve against validscores and return  */
         $mask        = [];
         $thisscore   = $this->_findValidScores( $allscore, $count, $mask );
