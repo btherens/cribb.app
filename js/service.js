@@ -18,6 +18,7 @@ const app_urls   = [
     '/asset/board-icon@180x.png',
     '/asset/board-icon@512x.png',
     '/asset/action-icon.svg',
+    '/asset/delete.svg',
     /* fonts */
     '/asset/card.woff2',
     '/asset/text.woff2'

@@ -341,19 +341,27 @@ label.tactile > input[type=range] {
     }
 }
 .header.tactile.board {
-    background-color: var(--pegholecolor);
     color: var(--boardcolor);
     border-radius: 0.75em 0.75em 0 0;
 }
 .list.tactile.board {
+    /* allow absolutely positioned overlays */
+    position: relative;
+    background-color: var(--btn-back);
     border: 0.1em solid var(--pegholecolor);
-    /* height: 3em; */
     height: 3.1em;
     display: flex;
     align-items: center;
     overflow: hidden;
     margin-top: -0.1em;
     border-radius: 0;
+}
+
+.list.tactile.board { transition: height 0.25s ease-out; }
+.list.tactile.board.delete { height: 0; }
+/* .list.tactile.board items with new class get light highlights */
+.list.tactile.board.new {
+    background-color: var(--btn-background-1);
 }
 .list.tactile.board.fitcontent {
     height: fit-content;
@@ -367,6 +375,7 @@ label.tactile > input[type=range] {
 .list.tactile.board.solo { margin-top: 0; }
 
 .header.list.tactile.board {
+    background-color: var(--pegholecolor);
     font-size: 0.5em;
     height: 1.5em;
     display: block;
@@ -391,33 +400,69 @@ div:last-child > .list.tactile.board:last-child {
     .list.tactile.board.solo { border-radius: 0.75em; }
 }
 
-.list.tactile.board > div:not(:first-child) {
+/*
+.list.tactile.board > div:not(:first-child):not(:last-child) {
     box-shadow: -0.1em 0em 0em 0em var(--pegholecolor);
     margin-left: 0.1em;
 }
+*/
+
+.list.tactile.board > .overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    margin-left: 0 !important;
+    display: flex;
+}
+.list.tactile.board > .overlay {
+    background-color: transparent;
+    pointer-events: none;
+    visibility: hidden;
+}
+.list.tactile.board > .overlay.show {
+    pointer-events: all;
+    visibility: visible;
+}
+
+.list.tactile.board > .overlay > .info {
+    height: 100%;
+    width: 3em;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.list.tactile.board > .overlay > .info > span {
+    padding-bottom: 0.58em;
+    font-size: 2em;
+    color: var(--btn-control-color);
+}
+
+.list.tactile.board > .overlay > div:not(:first-child) {
+    /* margin-left: 0.1em; */
+}
+
 .listbox {
     height: 100%;
     width: calc(100% - 3.1em);
-    background-color: var(--btn-back);
-    /*
+    
     box-shadow: -0.1em 0em 0em 0em var(--pegholecolor);
     margin-left: 0.1em;
-    */
-}
-/* .list.tactile.board items with .new get light highlights */
-.new > .listbox {
-    background-color: var(--btn-background-1);
 }
 
-.listbox > .name {
+.listbox > div:first-child {
     height: 40%;
     width: 100%;
     display: table;
+}
+
+.listbox > div:first-child:last-child {
+    height: 100%;
+}
+
+.listbox > .name {
     white-space: nowrap;
     text-align: left;
-}
-.listbox > .name:last-child {
-    height: 100%;
 }
 
 .listbox > .name > span {
@@ -425,16 +470,21 @@ div:last-child > .list.tactile.board:last-child {
     padding-left: 0.2em;
     display: table-cell;
     vertical-align: middle;
-    /* text-align: left; */
-    font-size: 0.6em;
+    font-size: 0.58em;
 }
-.listbox > .name.rank > span {
-    background-color: var(--list-rank-color);
-    color: var(--btn-control-color);
+
+.overlay.show .listbox > .name > span {
+    background-color: var(--btn-back);
 }
-/* .new > */
-.listbox > .name.rank > span {
+
+.new > .overlay.show .listbox > .name > span {
+    background-color: var(--btn-background-1);
+}
+
+.rank .listbox > .name > span,
+.rank > .overlay.show .listbox > .name > span {
     background-color: var(--list-rank-new-color);
+    color: var(--btn-control-color);
 }
 
 .listbox > .headrow {
@@ -467,26 +517,34 @@ div:last-child > .list.tactile.board:last-child {
     display: table;
     white-space: nowrap;
 }
-.listbox > .score > div {
+.listbox > .score > span {
     display: table-cell;
     vertical-align: middle;
     width: 50%;
     height: 100%;
     padding-right: 0.1em;
 }
+.listbox > .score > span.red {
+    color: var(--btn-control-color);
+    background-color: var(--boardredcolor);
+}
+.listbox > .score > span.green {
+    color: var(--btn-control-color);
+    background-color: var(--list-rank-new-color);
+}
 /*
 .listbox.one > .name  > span,
 */
-.listbox.one > .score > div:first-child,
-.listbox.two > .score > div:last-child {
+.listbox.one > .score > span:first-child,
+.listbox.two > .score > span:last-child {
     background-color: var(--cardredcolor);
     color: var(--btn-control-color);
 }
 /*
 .listbox.two > .name  > span,
 */
-.listbox.two > .score > div:first-child,
-.listbox.one > .score > div:last-child {
+.listbox.two > .score > span:first-child,
+.listbox.one > .score > span:last-child {
     /*
     color: var(--boardbluecolor);
     */
@@ -494,17 +552,10 @@ div:last-child > .list.tactile.board:last-child {
     color: var(--btn-control-color);
 }
 
-.listbox > .score > div:not(:first-child) {
+.listbox > .score > span:not(:first-child) {
     /* border-left: 0.1em solid var(--pegholecolor); */
     box-shadow: -0.1em 0em 0em 0em var(--pegholecolor);
     padding-right: unset;
-}
-
-.contextbox {
-    height: 100%;
-    width: 0;
-    box-shadow: none;
-    margin-left: 0;
 }
 
 .avatar.list {
@@ -516,10 +567,41 @@ div:last-child > .list.tactile.board:last-child {
 .avatar.list.nocolor { background-color: unset; }
 
 /* shrink avatar to re-balance in center around circle background */
-.avatar.list > svg {
-    height: 89.5%;
-}
+.avatar.list > svg { height: 89.5%; }
 
+
+/* delay visibility change on close */
+.list.tactile.board > .overlay:not( .show ) { transition: visibility 0s 0.1s; }
+
+/* transition */
+.avatar.list > svg { transition: filter 0.1s ease-out; }
+.list.tactile.board > .overlay .headrow,
+.list.tactile.board > .overlay .score {
+    transition: transform 0.1s ease-out;
+}
+.list.tactile.board > .overlay > .info,
+.list.tactile.board > .overlay .name {
+    transition: opacity 0.1s ease-out;
+}
+.list.tactile.board > .overlay .headrow {
+    transform: translateX(100%);
+}
+.list.tactile.board > .overlay.show .headrow {
+    transform: translateX(0%);
+}
+.list.tactile.board > .overlay .score {
+    transform: translateY(100%);
+}
+.list.tactile.board > .overlay.show .score {
+    transform: translateY(0%);
+}
+/* fade-out avatar overlay */
+.list.tactile.board > .overlay > .info,
+.list.tactile.board > .overlay .name { opacity: 0; }
+.list.tactile.board > .overlay.show > .info,
+.list.tactile.board > .overlay.show .name { opacity: 1; }
+/* apply gray filter when overlay is open */
+.avatar.list:has( ~ .overlay.show ) > svg { filter: grayscale(100%) brightness(30%); }
 
 .notebox {
     height: 100%;
@@ -689,4 +771,12 @@ div:last-child > .list.tactile.board:last-child {
 span.action-icon {
     content: url(/asset/action-icon.svg);
     height: 0.8em;
+}
+
+span.svg-char { height: 0.8em; }
+
+span > svg {
+    display: inline;
+    height: 1em;
+    width: 1em;
 }
