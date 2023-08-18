@@ -11,8 +11,8 @@ import LobbyController    from './lobbycontroller.js';
 import GameListController from './gamelistcontroller.js';
 import GameController     from './gamecontroller.js';
 import AboutController    from './aboutcontroller.js';
-import EndController      from './endcontroller.js';
 import ModalController    from './modalcontroller.js';
+import GamestatusController from './gamestatuscontroller.js';
 
 export default class AppController extends Controller
 {
@@ -29,7 +29,7 @@ export default class AppController extends Controller
         this._gamelist  = new GameListController();
         this._game      = new GameController();
         this._about     = new AboutController();
-        this._end       = new EndController();
+        this._status    = new GamestatusController();
 
         /* apply bindings */
         /* give controllers access to route() */
@@ -39,7 +39,7 @@ export default class AppController extends Controller
         this._lobby   .bindRoute( this.route );
         this._gamelist.bindRoute( this.route );
         this._game    .bindRoute( this.route );
-        this._end     .bindRoute( this.route );
+        this._status  .bindRoute( this.route );
         /* push service */
         this._mainmenu.bindInitPushService( this.initPushService );
         /* sync event */
@@ -63,9 +63,9 @@ export default class AppController extends Controller
         this._lobby   .bindIdName( this.idName );
         this._lobby   .bindIdAvatar( this.idAvatar );
         this._lobby   .bindIdStat( this.idStat );
-        this._end     .bindIdName( this.idName );
-        this._end     .bindIdAvatar( this.idAvatar );
-        this._end     .bindPopMenu( this.handlePopMenu );
+        this._status  .bindIdName( this.idName );
+        this._status  .bindIdAvatar( this.idAvatar );
+        this._status  .bindPopMenu( this.handlePopMenu );
         this._mainmenu.bindIdName( this.idName );
         this._mainmenu.bindIdAvatar( this.idAvatar );
         this._mainmenu.bindIdStat( this.idStat );
@@ -439,7 +439,7 @@ export default class AppController extends Controller
     openEnd = ( gid = null ) =>
     {
         /* generate a fresh lobby view */
-        const view = this._end.createView();
+        const view = this._status.createView();
         /* set pulldown state properties */
         const pdstate = this._setPulldownState( true, true, null, true );
         /* append view to pulldown menu - call popState on close */
@@ -450,7 +450,7 @@ export default class AppController extends Controller
             this.popState();
         } );
         /* open end screen from server */
-        this._end.fetchEnd( gid ).then( g =>
+        this._status.fetchEnd( gid ).then( g =>
         {
             if ( g?.g )
             {

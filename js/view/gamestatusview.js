@@ -1,7 +1,7 @@
 /* imports */
 import View from './view.js';
 
-export default class EndView extends View
+export default class GamestatusView extends View
 {
     constructor()
     {

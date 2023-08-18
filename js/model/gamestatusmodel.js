@@ -1,7 +1,7 @@
 /* imports */
 import Model from './model.js';
 
-export default class EndModel extends Model
+export default class GamestatusModel extends Model
 {
     constructor()
     {

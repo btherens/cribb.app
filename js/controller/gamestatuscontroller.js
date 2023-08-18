@@ -1,16 +1,16 @@
 /* imports */
 import Controller from './controller.js';
-import EndModel from '../model/endmodel.js';
-import EndView from '../view/endview.js';
+import _model     from '../model/gamestatusmodel.js';
+import _view      from '../view/gamestatusview.js';
 
-import sfetch from '../sfetch.js';
-import AvatarController from './avatarcontroller.js';
+import sfetch            from '../sfetch.js';
+import AvatarController  from './avatarcontroller.js';
 import ListboxController from './listboxcontroller.js';
-import ButtonController from './buttoncontroller.js';
+import ButtonController  from './buttoncontroller.js';
 
-export default class EndController extends Controller
+export default class GamestatusController extends Controller
 {
-    constructor( model = new EndModel, view = new EndView )
+    constructor( model = new _model, view = new _view )
     {
         super( model, view );
 
@@ -19,7 +19,6 @@ export default class EndController extends Controller
 
         this.model.bindOnModelChanged( this.onModelChanged );
         this.view.bindClickButton( this.handleClickButton );
-
     }
 
     /* events */
