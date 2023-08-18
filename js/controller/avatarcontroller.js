@@ -72,12 +72,6 @@ export default class AvatarController extends Controller
         this.onFormChanged = handler
     }
 
-    bindSetPulldownState( h )
-    {
-        //this.setPulldownState = h;
-        this.view.bindSetPulldownState( h );
-    }
-
     createAvataaarSetting( cfg )
     {
         if ( cfg )
