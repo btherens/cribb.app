@@ -20,8 +20,11 @@ export default class GameController extends Controller
         this._p1score = new PegscoreController( 2 );
         this._p2score = new PegscoreController( 1 );
 
+        /* allow drag to default target behavior if the current drag has a higher top than start location */
+        DragController.isDefaultMove  = ( ev, els ) => ( els[ 0 ].dragOrigin.parent !== this.view.playerhand ) || ( 0 > ( ev ? ev.clientY : 0 ) - ( DragController._start ? DragController._start.top : 0 ) );
         /* card selection event */
         DragController.onActiveChange = () => this.onStateChanged();
+        /* when card moves to new dom location */
         DragController.onDomChange    = this.onCardsMove;
 
         this.view.bindClickButton( this.handleClickButton );
