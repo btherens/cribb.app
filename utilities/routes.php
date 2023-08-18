@@ -8,6 +8,7 @@ $map = [
     [ '/^i\/?$/',    'game'         ],
     [ '/^i\//',      'game/invite/' ],
     [ '/^g\//',      'game/game/'   ],
+    [ '/^s\//',      'game/status/' ],
     [ '/^r\//',      'game/result/' ],
     [ '/^list\/?$/', 'game/list/'   ]
 ];

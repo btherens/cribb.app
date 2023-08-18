@@ -18,47 +18,17 @@ class GameController extends Controller
         $appload->index();
     }
 
-    /* return application with client-side routing to invite view */
-    public function invite( $gid ): void
-    {
-        /* present page if link looks right */
-        if ( $gid = $this->_filterGid( $gid[ 0 ] ) )
-        {
-            $appload = new ApploaderController( 'index', 'cribbage challenge!' );
-            $appload->index();
-        }
-        /* reroute to root */
-        else
-        {
-            http_response_code( 404 );
-            header( 'Location: /' );
-        }
-    }
-
-    /* return application with client-side routing to game view */
-    public function game( $gid ): void
+    /* return application for a valid GID */
+    public function invite( $gid ): void { $this->_gidPageLoader( $gid, 'cribbage challenge!' ); }
+    public function game(   $gid ): void { $this->_gidPageLoader( $gid, 'open game' ); }
+    public function result( $gid ): void { $this->_gidPageLoader( $gid, 'results' ); }
+    public function status( $gid ): void { $this->_gidPageLoader( $gid, 'game details' ); }
+    private function _gidPageLoader( $gid, string $title ): void
     {
         /* validate gid value */
         if ( $gid = $this->_filterGid( $gid[ 0 ] ) )
         {
-            $appload = new ApploaderController( 'index', 'open game' );
-            $appload->index();
-        }
-        /* reroute to root */
-        else
-        {
-            http_response_code( 404 );
-            header( 'Location: /' );
-        }
-    }
-
-    /* application result view */
-    public function result( $gid ): void
-    {
-        /* validate gid value */
-        if ( $gid = $this->_filterGid( $gid[ 0 ] ) )
-        {
-            $appload = new ApploaderController( 'index', 'results' );
+            $appload = new ApploaderController( 'index', $title );
             $appload->index();
         }
         /* reroute to root */
