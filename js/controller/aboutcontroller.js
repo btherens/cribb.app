@@ -63,7 +63,6 @@ export default class AboutController extends Controller
                 /* app size note */
                 this._createSizeNote( cachesize, lssize )
             );
-            this.view.displayFooter( vabout, url, author );
         }
         if ( vchangelog )
         {
@@ -76,7 +75,6 @@ export default class AboutController extends Controller
                     c.list?.map( l => this.view.create( 'li', 0, l ) )
                 ) )
             );
-            this.view.displayFooter( vchangelog, url, author );
         }
         if ( vprivacy )
         {
@@ -99,7 +97,6 @@ export default class AboutController extends Controller
                     }
                 } )
             );
-            this.view.displayFooter( vprivacy, url, author );
         }
         if ( vlicense )
         {
@@ -115,45 +112,60 @@ export default class AboutController extends Controller
                     )
                 );
             this.view.displayLicenseView( license.map( l => ListboxController.createNoteBox( l.title, l.licenseurl ?? l.url, null, l?.disclaimer, text2dom( l?.fulllicense ), true ) ) );
-            this.view.displayFooter( vlicense, url, author );
             /* load licenses from server if not loaded yet */
             if ( !license.filter( l => l?.fulllicense ).length ) { this.fetchLicenses() }
         }
     }
 
     /* return a new about view */
-    createAboutView( )
+    createAboutView(
+        url    = this.model.url,
+        author = this.model.author
+    )
     {
         /* create view */
         const view = this.view.createAboutView();
+        this.view.displayFooter( view, url, author );
         /* fully populate view */
         this.onModelChanged();
         return view;
     }
 
     /* return a new changelog view */
-    createChangelogView( )
+    createChangelogView(
+        url    = this.model.url,
+        author = this.model.author
+    )
     {
         /* create view */
         const view = this.view.createChangelogView();
+        this.view.displayFooter( view, url, author );
         /* fully populate view */
         this.onModelChanged();
         return view;
     }
 
-    createPrivacyView( )
+    createPrivacyView(
+        url    = this.model.url,
+        author = this.model.author
+    )
     {
         /* create view */
         const view = this.view.createPrivacyView();
+        this.view.displayFooter( view, url, author );
         /* fully populate view */
         this.onModelChanged();
         return view;
     }
 
-    createLicenseView( )
+    createLicenseView(
+        url    = this.model.url,
+        author = this.model.author
+    )
     {
         /* create view */
         const view = this.view.createLicenseView();
+        this.view.displayFooter( view, url, author );
         /* fully populate view */
         this.onModelChanged();
         return view;

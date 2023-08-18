@@ -12,11 +12,13 @@ export default class AboutView extends View
     _createBlankViewWrapper( view, header )
     {
         /* return a DOM view */
-        return this.create('div', { class: 'flex-container column scroll' }, [
+        return this.create( 'div', { class: 'flex-container column scroll' }, [
             this.create( 'span', { class: 'pd-header' }, header ),
-            this.create( 'div', { class: 'fullscreen-flex-all' } ),
+            //this.create( 'div', { class: 'fullscreen-flex-all' } ),
             this.create( 'div', { class: 'flex-container dynamic tactile-margin' }, view ),
-            this.create( 'div', { class: 'fullscreen-flex-all' } )
+            //this.create( 'div', { class: 'fullscreen-flex-all' } ),
+
+            //this.create( 'div', { class: 'fullscreen-flex-all' } )
         ] );
     }
 
@@ -150,12 +152,20 @@ export default class AboutView extends View
     /* append a footer to list */
     displayFooter( view, sUrl, cname )
     {
-        view.appendChild(
+        this._nest( view, [
+            this.create( 'div', { class: 'fullscreen-flex-all' } ),
             this.create( 'div', { class: 'textblock' }, [
                 sUrl != null ? this.create( 'a', { target: '_blank', href: sUrl, onclick: e => e.stopPropagation() }, 'source code' ) : null,
                 this.create( 'span', 0, ( ( sUrl != null ? ' | ' : '' ) + '© ' + new Date().getFullYear() + ( cname != null ? ' ' + cname : '' ) ) )
             ] )
-        )
+        ] )
+        //view.appendChild( this.create( 'div', { class: 'fullscreen-flex-all' } ) );
+        //view.appendChild(
+        //    this.create( 'div', { class: 'textblock' }, [
+        //        sUrl != null ? this.create( 'a', { target: '_blank', href: sUrl, onclick: e => e.stopPropagation() }, 'source code' ) : null,
+        //        this.create( 'span', 0, ( ( sUrl != null ? ' | ' : '' ) + '© ' + new Date().getFullYear() + ( cname != null ? ' ' + cname : '' ) ) )
+        //    ] )
+        //)
     }
 
     /* bindings */
