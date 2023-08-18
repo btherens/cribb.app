@@ -6,6 +6,8 @@ function runservice() {
     THISDIR="$(dirname "$(readlink -f "$0")")";
     PUSHLOCK="$THISDIR/pushservice.lock";
     PUSHRUN="$THISDIR/pushservice.php";
+    # delete lock if older than 90 minutes
+    # find "$PUSHLOCK" -type d -mmin +90 -exec rm -rdf {} \; >/dev/null 2>&1;
     # lock folder
     if mkdir "$PUSHLOCK";
     then
