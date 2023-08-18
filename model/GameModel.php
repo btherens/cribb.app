@@ -103,7 +103,7 @@ class GameModel extends Model
         /* prepare statements */
         $q = 'SELECT *
               FROM `vgamelist`
-              WHERE `p1_id` = ? AND `round` > -2
+              WHERE `p1_id` = ? AND `round` > -2 AND `ignore` = 0
               ORDER BY IF( `p2_id` IS NULL, now(), `timestamp` ) DESC';
         $a = [ $id ];
         /* use offset/limit if we can */

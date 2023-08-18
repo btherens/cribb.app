@@ -177,7 +177,7 @@ class GameController extends Controller
     }
 
     /* return list of games for id */
-    public function hideGame(): void
+    public function hideGame( $cmd ): void
     {
         $response = [ 'success' => false ];
         try
@@ -186,12 +186,11 @@ class GameController extends Controller
             {
                 /* set ignore flag */
                 $this->_model->setGameKey( 'I', 0 );
-                /* confirm result */
-                $response = [ 'success' => true ];
+                /* return new gamelist */
+                $this->getGames();
             }
         }
         catch ( Exception $e ) { http_response_code( 500 ); }
-        $this->_returnResponse( $response );
     }
 
     /* get a game's state */
@@ -215,7 +214,7 @@ class GameController extends Controller
                 {
                     /* has a new game been started */
                     $response[ 'ng' ] = !!$this->_model->getLink()[ 0 ];
-                    
+
                     /* add rank info to response */
                     if ( $response[ 'se' ][ 'rank' ] )
                     {
