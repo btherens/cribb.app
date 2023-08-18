@@ -29,8 +29,25 @@ class PushModel extends Model
         );
     }
 
-    /* delete a subscription permanently */
-    public function dropSubscription( int $id ): void { $this->run( 'DELETE FROM `pushsubscription` WHERE `id` = ?', [ $id ] ); }
+    /* collection of subscription ids to be dropped */
+    private array $_dropSubs = [];
+    /* append an id to be dropped (requires flush function to complete) */
+    public function dropSubscription( int $id ): void { $this->_dropSubs[] = $id; }
+
+    /* delete pending dropped subscriptions */
+    public function flushDroppedSubscriptions(): void
+    {
+        $ids = &$this->_dropSubs;
+        if ( count( $ids ) )
+        {
+            /* create positional args for each id */
+            $values = ''; foreach ( $ids as $id ) { $values = $values ? ( $values . ', ?' ) : '? '; }
+            /* run statement */
+            $this->run( 'DELETE FROM `pushsubscription` WHERE `id` IN ( ' . $values . ' )', $ids );
+            /* clear property */
+            $this->_dropSubs = [];
+        }
+    }
 
     /* return a list of pending notifications */
     public function listPush(): PDOStatement
