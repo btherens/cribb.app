@@ -154,10 +154,12 @@ export default class AboutView extends View
     {
         this._nest( view, [
             this.create( 'div', { class: 'fullscreen-flex-all' } ),
-            this.create( 'div', { class: 'textblock' }, [
-                sUrl != null ? this.create( 'a', { target: '_blank', href: sUrl, onclick: e => e.stopPropagation() }, 'source code' ) : null,
-                this.create( 'span', 0, ( ( sUrl != null ? ' | ' : '' ) + '© ' + new Date().getFullYear() + ( cname != null ? ' ' + cname : '' ) ) )
-            ] )
+            this.create( 'div', { class: 'flex-container column width-1' },
+                this.create( 'div', { class: 'textblock' }, [
+                    sUrl != null ? this.create( 'a', { target: '_blank', href: sUrl, onclick: e => e.stopPropagation() }, 'source code' ) : null,
+                    this.create( 'span', 0, ( ( sUrl != null ? ' | ' : '' ) + '© ' + new Date().getFullYear() + ( cname != null ? ' ' + cname : '' ) ) )
+                ] )
+            )
         ] )
     }
 
