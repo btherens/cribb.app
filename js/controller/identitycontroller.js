@@ -56,7 +56,6 @@ export default class IdentityController extends Controller
     bindRoute( handler ) { this.handleRoute = handler }
     bindPopMenu( handler ) { this.handlePopMenu = handler }
     bindServicesConnect( h ) { this.handleServicesConnect = h }
-    bindSetPulldownState( handler ) { this.liveavatar.bindSetPulldownState( handler ) }
 
     /* handlers */
     handleUpdateLiveName = ( e ) =>
