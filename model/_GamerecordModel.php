@@ -11,9 +11,9 @@ class _GamerecordModel extends Model
         $response = null;
         $q = $this->run(
             'WITH    args AS ( SELECT ? as `id`, ? AS `time` )
-            SELECT   t.`streak`, t.`maxstreak` FROM `vgame_result` t JOIN args a on 1 = 1
-            WHERE    a.`id` = t.`identity_id` AND ( ISNULL( a.`time` ) OR a.`time` > t.`timestamp` )
-            ORDER BY t.`timestamp` DESC, t.`id` DESC LIMIT 1;',
+            SELECT   t.`allstreak` as `streak`, t.`maxallstreak` AS `maxstreak` FROM `vgame_result` t JOIN args a on 1 = 1
+            WHERE    a.`id` = t.`identity_id` AND ( ISNULL( a.`time` ) OR a.`time` >= t.`timestamp` )
+            ORDER BY t.`timestamp` DESC, t.`id` DESC LIMIT 1',
             [ $identity_id, $maxtimestamp ]
         );
         if ( $c = $q->fetch() ) { $response = $c; }
@@ -27,7 +27,7 @@ class _GamerecordModel extends Model
         $a = [ null, null ];
         /* query */
         $q = $this->run(
-            'SELECT `identity_id`, `iswin`, `roundcount`, `score`, `minscore`, `maxscore`, `avgscore`, `streak`, `maxstreak` FROM `vgame_result` WHERE ? = `game_id` LIMIT 2',
+            'SELECT `identity_id`, `iswin`, `roundcount`, `score`, `minscore`, `maxscore`, `avgscore`, `oppstreak`, `maxoppstreak` FROM `vgame_result` WHERE ? = `game_id` LIMIT 2',
             [ $gid ]
         );
         /* set both player and opponent records to response */
@@ -47,8 +47,8 @@ class _GamerecordModel extends Model
                     'mns' => $o->minscore,
                     'mxs' => $o->maxscore,
                     'avs' => (float) $o->avgscore,
-                    'st'  => $o->streak,
-                    'mst' => $o->maxstreak
+                    'st'  => $o->oppstreak,
+                    'mst' => $o->maxoppstreak
                 ], $a )
             ];
         }
