@@ -60,7 +60,6 @@ export default class IdentityController extends Controller
     /* handlers */
     handleUpdateLiveName = ( e ) =>
     {
-        //if ( e.target.checkValidity() ) { this.model.setLiveName( e.target.value ) }
         if ( e.target.checkValidity() ) { this.model.liveName = e.target.value }
         /* reset form state if everything is null */
         if ( e.target.value == '' && this.model.storeName === null ) { this.model.liveName = null }

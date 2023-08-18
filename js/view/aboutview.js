@@ -159,13 +159,6 @@ export default class AboutView extends View
                 this.create( 'span', 0, ( ( sUrl != null ? ' | ' : '' ) + '© ' + new Date().getFullYear() + ( cname != null ? ' ' + cname : '' ) ) )
             ] )
         ] )
-        //view.appendChild( this.create( 'div', { class: 'fullscreen-flex-all' } ) );
-        //view.appendChild(
-        //    this.create( 'div', { class: 'textblock' }, [
-        //        sUrl != null ? this.create( 'a', { target: '_blank', href: sUrl, onclick: e => e.stopPropagation() }, 'source code' ) : null,
-        //        this.create( 'span', 0, ( ( sUrl != null ? ' | ' : '' ) + '© ' + new Date().getFullYear() + ( cname != null ? ' ' + cname : '' ) ) )
-        //    ] )
-        //)
     }
 
     /* bindings */

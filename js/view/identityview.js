@@ -68,8 +68,8 @@ export default class IdentityView extends View
         return this.create( 'div', { class: 'flex-container column' }, [
             this.create( 'span', { class: 'pd-header' }, 'update identity' ),
             /* fill display here */
-            this.create( 'div', { class: 'fullscreen-flex-wide' } ),
-            this.create('form', { class: 'flex-container dynamic fullscreen-flex-tall' }, [
+            this.create( 'div',  { class: 'fullscreen-flex-wide' } ),
+            this.create( 'form', { class: 'flex-container dynamic fullscreen-flex-tall' }, [
                 this.create( 'div', { class: 'flex-container column width-1 fullscreen-flex-tall' }, [
                     this.create( 'div', { class: 'fullscreen-flex-tall' } ),
                     elAv,

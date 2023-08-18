@@ -20,7 +20,6 @@ export default class LobbyController extends Controller
 
         this.view.bindUpdateColor( this.handleUpdateColor );
         this.view.bindUpdateRank( this.handleUpdateRank );
-        //this.view.bindClickAccept( this.handleClickAccept );
         this.model.bindOnModelChanged( this.onModelChanged );
 
         /* bind debounce function */
