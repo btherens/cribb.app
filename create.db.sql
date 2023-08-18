@@ -463,22 +463,21 @@ CREATE VIEW `vgame_result` AS
     WITH runs AS (
         SELECT
             *,
-            CASE
-                WHEN 1 = `iswin` THEN row_number() over ( PARTITION BY `identity_id`, `iswin` ORDER BY `timestamp` ASC, `id` ASC )
-                ELSE 0
-            END AS `streak`
+            COUNT( CASE WHEN `iswin` = 0 THEN 0 END ) OVER ( PARTITION BY `identity_id`           ORDER BY `timestamp` ASC, `id` ASC ) AS `allgroup`,
+            COUNT( CASE WHEN `iswin` = 0 THEN 0 END ) OVER ( PARTITION BY `identity_id`, `opp_id` ORDER BY `timestamp` ASC, `id` ASC ) AS `oppgroup`
         FROM `game_result`
     ),
-    agg AS (
-        SELECT `identity_id`, MAX( `streak` ) as `maxstreak`
+    strk AS (
+        SELECT
+            *,
+            ROW_NUMBER() OVER ( PARTITION BY `identity_id`, `allgroup` ORDER BY `timestamp` ASC, `id` ASC ) - IF( 0 = `allgroup`, 0, 1 ) AS `allstreak`,
+            ROW_NUMBER() OVER ( PARTITION BY `identity_id`, `opp_id`, `oppgroup`   ORDER BY `timestamp` ASC, `id` ASC ) - IF( 0 = `oppgroup`,   0, 1 ) AS `oppstreak`
         FROM runs
-        GROUP BY `identity_id`
     )
-    SELECT
-        t.*,
-        a.`maxstreak`
-    FROM runs t
-    JOIN agg a on t.`identity_id` = a.`identity_id`;
+    SELECT  s.*,
+            ( SELECT MAX( `as`.`allstreak` ) FROM strk `as` WHERE `as`.`identity_id` = s.`identity_id` AND `as`.`timestamp` <= s.`timestamp` ) AS `maxallstreak`,
+            ( SELECT MAX( `os`.`oppstreak` ) FROM strk `os` WHERE `os`.`identity_id` = s.`identity_id` AND `os`.`opp_id` = s.`opp_id` AND `os`.`timestamp` <= s.`timestamp` ) AS `maxoppstreak`
+    FROM    strk s;
 
 
 /* lookup most recent activity date for an id */
