@@ -51,8 +51,8 @@ export default class PulldownController extends Controller
 
     /* handlers */
     handleClickMenuBtn = () => {
-        /* only if the toggle is being shown */
-        if ( this.view.showMenuToggle )
+        /* only if the toggle is being shown and no elements are open in container */
+        if ( this.view.showMenuToggle && !this.view.container.getElementsByClassName( 'show' ).length )
         {
             if   ( this.view.showBackBtn ) { this.dropView() }
             /* toggle the menu's visibility */
