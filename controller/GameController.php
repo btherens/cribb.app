@@ -1289,10 +1289,10 @@ class GameController extends Controller
     }
 
     /* get the most recent player record info from model */
-    protected function _getPlayerRecord( $id ): ?stdclass
+    protected function _getPlayerRecord( $id, $oppid ): ?array
     {
-        $record =  new _GamerecordController( 0, $id, 0 );
-        return $record->getPlayerRecord( $id );
+        $record = new _GamerecordController( 0, $id, $oppid );
+        return $record->getPlayerRecord( $id, $oppid );
     }
 
     /* save the current stats for a (finished) game from gamemodel to gamerecord model */
