@@ -20,8 +20,11 @@ export default class GameController extends Controller
         this._p1score = new PegscoreController( 2 );
         this._p2score = new PegscoreController( 1 );
 
+        /* allow drag to default target behavior if the current drag has a higher top than start location */
+        DragController.isDefaultMove  = ( ev, els ) => ( els[ 0 ].dragOrigin.parent !== this.view.playerhand ) || ( 0 > ( ev ? ev.clientY : 0 ) - ( DragController._start ? DragController._start.top : 0 ) );
         /* card selection event */
         DragController.onActiveChange = () => this.onStateChanged();
+        /* when card moves to new dom location */
         DragController.onDomChange    = this.onCardsMove;
 
         this.view.bindClickButton( this.handleClickButton );
@@ -32,6 +35,8 @@ export default class GameController extends Controller
         /* import live values from hash */
         this.model._importHash();
     }
+
+    get gid() { return this.model.gid }
 
     /* events */
     /* run updates after model changes */
@@ -660,14 +665,14 @@ export default class GameController extends Controller
             DragController.unbind( this.view.playerhand );
             this.view.opphand.isdragreorder = true;
         }
+        /* bind inactive drag to the starter */
+        DragController.bindInactive( sdomh )
         /* set oppmode to inverse if we're meant to transition between */
         this.view.showFullOppHand = require.oppmode ? !oppmode : oppmode;
 
         /* update floatscore properties */
         //this._updateFloatScore();
 
-        /* bind inactive drag to the starter if it is player's turn */
-        if ( it ) { DragController.bindInactive( sdomh ) }
         /* keep starter active */
         if ( actives?.includes( sdomh._game.index ) ) { sdomh.classList.add( DragController.classActive ) }
         /* always render starter in position */
@@ -1734,13 +1739,12 @@ export default class GameController extends Controller
     /* return a blank game view */
     createGameView( )
     {
-        /* create view */
-        const view = this.view.createGameView(
-            ButtonController.create(
-                'table',
-                { id: 'action-btn', disabled: 'disabled', tabindex: 0, onclick: this.handleClickButton }
-            )
+        const button = ButtonController.create(
+            'table',
+            { id: 'action-btn', disabled: 'disabled', tabindex: 0, onclick: this.handleClickButton }
         );
+        /* create view */
+        const view = this.view.createGameView( button );
         /* set gameview to draggable area */
         DragController.screen = view;
         /* return new view */

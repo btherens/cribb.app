@@ -21,7 +21,7 @@ export default class ListboxController extends Controller
         datacol2,
         solo,
         clickhandler,
-        swipehandler
+        openoverlay
     ) =>
     {
         return _view._createListBox(
@@ -34,9 +34,21 @@ export default class ListboxController extends Controller
             datacol2,
             solo,
             clickhandler,
-            swipehandler
+            openoverlay
         )
     }
+
+    static createListOverlay = (
+        text,
+        datacol1,
+        datacol2,
+        clickhandler
+    ) => _view._createListOverlay(
+        text,
+        datacol1,
+        datacol2,
+        clickhandler
+    );
 
     static createTextblock = (
         text
@@ -50,10 +62,11 @@ export default class ListboxController extends Controller
         link,
         subheader,
         disclaimer,
-        body
+        body,
+        fitcontent
     ) =>
     {
-        return _view.createNoteBox( header, link, subheader, disclaimer, body )
+        return _view.createNoteBox( header, link, subheader, disclaimer, body, fitcontent )
     }
 
     static createHeader = (
@@ -66,7 +79,12 @@ export default class ListboxController extends Controller
     /* create a note with 1-n key / value rows */
     static createTableNote = ( obj ) => _view.create( 'div', { class: 'notebox' }, [ ...Object.entries( obj ).map( ( [ k, v ] ) => _view.createNoteRow( k, v ) ) ] );
 
-    /* listbox table header / value definition */
-    static tableSet = ( key, value ) => { return { [key]: value } };
+    /* listbox table header / value definition - optional onclick handler for events */
+    static tableSet = ( key, value, attr = null ) =>
+    {
+        const set = { [key]: value };
+        if ( null != attr ) set._attr = attr;
+        return set;
+    }
 
 }

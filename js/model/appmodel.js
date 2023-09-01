@@ -17,6 +17,7 @@ export default class AppModel extends Model
         /* load properties from localstorage */
         this._cookiewarning      = this.store?.cw  ?? false;
         this._installappreminder = this.store?.iar ?? false;
+        this._doPlayIntro        = this.store?.pi  ?? true;
         this._appversion         = this.store?.av  ?? null;
         this._updatecounter      = this.store?.rc  ?? 0;
 
@@ -36,6 +37,13 @@ export default class AppModel extends Model
     {
         this._installappreminder = !!b;
         this.store = { iar: this._installappreminder };
+    }
+
+    get doPlayIntro() { return this._doPlayIntro }
+    set doPlayIntro( b )
+    {
+        this._doPlayIntro = !!b;
+        this.store = { pi: this._doPlayIntro };
     }
 
     /* track if push sub functions have been triggered yet */

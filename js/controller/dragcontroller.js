@@ -38,9 +38,11 @@ export default class DragController extends Controller
 
     /* external events */
     /* when an object is dragged in the DOM */
-    static onDomChange = ( ) => { }
+    static onDomChange    = ( ) => { }
     /* when a change to the actives collection occurs */
-    static onActiveChange = ( ) => {  }
+    static onActiveChange = ( ) => { }
+    /* allow a dragged card to be moved to default destination */
+    static isDefaultMove  = ( ev ) => true;
     /* pass a function to execute and trigger activechange event if changes occur */
     static _triggerActivesChange = ( f = () => {}, c = DragController.onActiveChange ) =>
     {
@@ -234,7 +236,7 @@ export default class DragController extends Controller
             /* activate elements */
             for ( let el of els ) { el.classList.add( _view.classActive ) }
             /* scan for draggable elements under mouse and apply any new location info to _shift */
-            DragController._applyDomShift( null, els, mid, null, parent, insert );
+            DragController._applyDomShift( null, els, mid, null, null, parent, insert );
             /* apply pickup offset to elements */
             DragController._applyOffset( null, els, null );
 
@@ -349,12 +351,12 @@ export default class DragController extends Controller
         const isContainer = el => el.isdragcontainer;
         const isEl        = el => isContainer( el.parentNode ) && !els.find( a => a === el );
         return {
-            /* an object to insert behind - an inactive element inside a drag-enabled collection */
+            /* an object to insert behind  - an inactive element inside a drag-enabled collection */
             el:         scan.find( el => isEl( el ) ) ?? null,
             /* a collection to insert into - a list with drag property */
             collection: scan.find( el => isContainer( el ) ) ?? null,
             /* returns a drag aware space - if this is null we're outside the screen */
-            screen:     scan.find( el => el === _view.screen ) ?? null
+            screen:     scan.find( el => el === _view.screen ) || null
         }
     }
 
@@ -363,15 +365,17 @@ export default class DragController extends Controller
         /* drag event (required for dragcontext) */
         ev,
         /* elements being moved */
-        els    = _view.actives,
+        els         = _view.actives,
         /* callback to be run mid-move */
-        c      = null,
+        c           = null,
+        /* allow default dom move */
+        moveDefault = DragController.isDefaultMove( ev, els ),
         /* two separate methods of passing new location info */
         /* 1: the location of user pointer will be scanned for relevant drags and executed */
-        dc     = DragController._scanDragContext( ev, els ),
+        dc          = DragController._scanDragContext( ev, els ),
         /* 2: force - move the els to new parent and insert */
-        fp     = null,
-        fi     = null
+        fp          = null,
+        fi          = null
     ) => {
         /* get index of element in dom */
         const getIndex = _view.getIndex;
@@ -405,7 +409,7 @@ export default class DragController extends Controller
                     if ( el !== dc.collection.children[ 0 + i ] && el !== dc.collection.children[ dc.collection.children.length - els.length + i ] ) { [ parent, insert ] = [ dc.collection, dc.collection.children[ 0 + i ] ] }
                 }
                 /* drag is somewhere over the game screen (but not an active element or collection) */
-                else if ( dc.screen )
+                else if ( moveDefault && dc.screen )
                 {
                     /* send element to its explicitly set drag target (by default drags complete to the default target) */
                     if ( DragController.dragTarget?.isdragcontainer && el.parentNode !== DragController.dragTarget ) { [ parent, insert ] = [ DragController.dragTarget, null ] }

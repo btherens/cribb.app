@@ -20,58 +20,97 @@ export default class ListboxView extends View
         datacol2,
         solo,
         clickhandler,
-        swipehandler
+        openoverlay
     ) => {
         /* define avatar box */
         const avdom = ListboxView.create( 'div', { class: 'avatar list' } );
         avdom.innerHTML = svg;
 
-        const listbox = ListboxView.create( 'div', { class: ( 'list tactile board ' ) }, [
+        const listbox = ListboxView.create( 'div', { class: 'list tactile board' + ( rankcolor ? ' rank' : '' ) }, [
             avdom,
             ListboxView.create( 'div', { class: 'listbox' }, [
-                ListboxView.create( 'div', { class: 'name' + ( rankcolor ? ' rank' : '' ) }, ListboxView.create( 'span', 0, name ) ),
+                ListboxView.create( 'div', { class: 'name' }, ListboxView.create( 'span', 0, name ) ),
                 ( datacol1 || datacol2 != null ) ? ListboxView.create( 'div', { class: 'headrow' }, [
                     ListboxView.create( 'span', 0, Object.keys( datacol1 )[ 0 ] ),
                     ListboxView.create( 'span', 0, Object.keys( datacol2 )[ 0 ] )
                 ] ) : null,
                 ( datacol1 || datacol2 != null ) ? ListboxView.create( 'div', { class: 'score' }, [
-                    ListboxView.create( 'div', { }, Object.values( datacol1 )[ 0 ] ),
-                    ListboxView.create( 'div', { }, Object.values( datacol2 )[ 0 ] )
+                    ListboxView.create( 'span', { }, Object.values( datacol1 )[ 0 ] ),
+                    ListboxView.create( 'span', { }, Object.values( datacol2 )[ 0 ] )
                 ] ) : null
             ] ),
-            swipehandler ? ListboxView.create( 'div', { class: 'contextbox' } ) : null
+            //openoverlay ? ListboxView.create( 'div', { class: 'overlay' } ) : null
+            openoverlay || null
         ] );
         /* set conditional features */
         if      ( 1 == altcolor ) { avdom.classList.add( 'color' ) }
         else if ( 2 == altcolor ) { avdom.classList.add( 'nocolor' ) }
         if      ( highlight     ) { listbox.classList.add( 'new'  ) }
         if      ( solo          ) { listbox.classList.add( 'solo' ) }
-        if      ( clickhandler  ) { listbox.addEventListener( 'click', clickhandler, false ) }
+        if      ( clickhandler || openoverlay )
+        {
+            listbox.addEventListener( 'click', ( e ) =>
+            {
+                /* trigger an attached clickhandler if openoverlay is open or not attached */
+                if   ( 'function' == typeof clickhandler ) { clickhandler( e ) }
+                /* otherwise toggle an overlay opening */
+                else { openoverlay?.classList.toggle( 'show' ) }
+            } )
+        }
 
         return listbox;
     }
 
+    static _createListOverlay = (
+        text,
+        datacol1,
+        datacol2,
+        clickhandler
+    ) => ListboxView.create( 'div', {
+        class: 'overlay',
+        onpointerdown: e => this.captureClassFocus( e, 'show' ),
+        onclick: e =>
+        {
+            if ( typeof clickhandler == 'function' ) { clickhandler( e ) }
+            e.stopPropagation();
+        }
+    }, [
+        ListboxView.create( 'div', { class: 'info' },
+            ListboxView.create( 'span', {}, '...' )
+        ),
+        ListboxView.create( 'div', { class: 'listbox' }, [
+            //ListboxView.create( 'div', {} ),
+            ListboxView.create( 'div', text ? { class: 'name' } : {}, text ? ListboxView.create( 'span', 0, text ) : null ),
+            ( datacol1 || datacol2 != null ) ? ListboxView.create( 'div', { class: 'headrow' }, [
+                ListboxView.create( 'span', 0, Object.keys( datacol1 )[ 0 ] ),
+                ListboxView.create( 'span', 0, Object.keys( datacol2 )[ 0 ] )
+            ] ) : null,
+            ( datacol1 || datacol2 != null ) ? ListboxView.create( 'div', { class: 'score' }, [
+                ListboxView.create( 'span', datacol1?._attr ?? null, Object.values( datacol1 )[ 0 ] ),
+                ListboxView.create( 'span', datacol2?._attr ?? null, Object.values( datacol2 )[ 0 ] )
+            ] ) : null
+        ] )
+    ] );
+
     static createHeader  = ( h ) => ListboxView.create( 'div', { class: 'list header tactile board' }, h );
 
-    static createNoteBox = ( h, u, a, d, b ) =>
+    static createNoteBox = ( header, url, author, disclaimer, body, fitcontent ) =>
     {
-        return ListboxView.create( 'div', { class: 'list tactile board' },
+        return ListboxView.create( 'div', { class: 'list tactile board' + ( fitcontent ? ' fitcontent' : '' ) },
             ListboxView.create( 'div', { class: 'notebox' }, [
-                ListboxView.create( 'div', {
-                    class: 'head'
-                }, [
+                ( header || url || disclaimer || author ) ? ListboxView.create( 'div', { class: 'head' }, [
                     ListboxView.create( 'a', {
-                        class:  h.length > 16 ? 'tiny' : h.length > 12 ? 'small' : '',
+                        class:  header?.length > 16 ? 'tiny' : header?.length > 12 ? 'small' : '',
                         target:  '_blank',
-                        href:    u,
+                        href:    url,
                         onclick: e => e.stopPropagation()
-                    }, h ),
-                    ListboxView.create( 'span', { class: 'disclaimer' }, d )
-                ] ),
-                ListboxView.create( 'span', { class: 'author' }, a ),
+                    }, header ),
+                    ListboxView.create( 'span', { class: 'disclaimer' }, disclaimer )
+                ] ) : null,
+                ( header || url || disclaimer || author ) ? ListboxView.create( 'span', { class: 'author' }, author ) : null,
                 ListboxView.create( 'span', { class: 'body' + ( (
-                    typeof b == 'string' ? ( b.length > 95 ) : ( b?.length > 2 )
-                ) ? ' small' : '' ) }, b )
+                    typeof body == 'string' ? ( body.length > 95 ) : ( body?.length > 2 )
+                ) ? ' small' : '' ) }, body )
             ] )
         )
     }

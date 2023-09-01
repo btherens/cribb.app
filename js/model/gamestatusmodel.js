@@ -1,21 +1,35 @@
 /* imports */
 import Model from './model.js';
 
-export default class EndModel extends Model
+export default class GamestatusModel extends Model
 {
     constructor()
     {
         super();
 
-        this._avatar = null;
-        this._name = null;
-        this._gid = '';
-
-        this._color = false;
-        this._rank  = false;
+        this.clear();
     }
 
-    /* host properties */
+    /* initiate/reset model properties */
+    clear()
+    {
+        this._gid    = '';
+        this._avatar = null;
+        this._name   = null;
+        this._stage  = null;
+        this._score  = null;
+        this._stat   = null;
+        this._color  = false;
+        this._rank   = false;
+        this._next   = false;
+    }
+
+    get gid() { return this._gid }
+    set gid( gid )
+    {
+        this._gid = gid;
+    }
+
     get avatar() { return this._avatar }
     set avatar( a )
     {
@@ -28,10 +42,10 @@ export default class EndModel extends Model
         this._name = n;
     }
 
-    get gid() { return this._gid }
-    set gid( gid )
+    get stage() { return this._stage }
+    set stage( s )
     {
-        this._gid = gid;
+        this._stage = s ?? null;
     }
 
     get score() { return this._score }

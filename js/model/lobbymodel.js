@@ -3,19 +3,23 @@ import Model from './model.js';
 
 export default class LobbyModel extends Model
 {
-    constructor()
+    constructor( hash = 'lobby' )
     {
         super();
+
+        this.setStoreScope( hash );
 
         this._avatar = null;
         this._name = null;
         this._type = 'guest';
         this._gid = '';
 
-        this._liveColor  = false;
-        this._liveRank   = false;
-        this._storeColor = false;
-        this._storeRank  = false;
+        /* load properties from storage */
+        this._storeColor = this.store?.color ?? null;
+        this._storeRank  = this.store?.rank  ?? null;
+        this._liveColor  = this._storeColor;
+        this._liveRank   = this._storeRank;
+
         this._stat       = null;
     }
 
@@ -49,13 +53,15 @@ export default class LobbyModel extends Model
     set storeColor( i )
     {
         this._storeColor = i;
-        this._liveColor = this._storeColor;
+        this.store       = { color: this._storeColor };
+        this._liveColor  = this._storeColor;
     }
 
     get storeRank() { return this._storeRank }
     set storeRank( i )
     {
         this._storeRank = i;
+        this.store      = { rank: this._storeRank };
         this._liveRank  = this._storeRank;
     }
 

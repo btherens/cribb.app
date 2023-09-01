@@ -5,18 +5,41 @@ class _GamerecordModel extends Model
     /* constructor */
     public function __construct() { parent::__construct(); }
 
-    /* return a player's record (don't include records more recent than max timestamp) */
-    public function getPlayerRecord( int $identity_id, int $maxtimestamp = null ): ?stdclass
+    /* return a player's record vs (1) all players, or (2) an opponent if included */
+    public function getPlayerRecord( int $identity_id, int $opp_id = null ): ?array
     {
         $response = null;
         $q = $this->run(
-            'WITH    args AS ( SELECT ? as `id`, ? AS `time` )
-            SELECT   t.`streak`, t.`maxstreak` FROM `vgame_result` t JOIN args a on 1 = 1
-            WHERE    a.`id` = t.`identity_id` AND ( ISNULL( a.`time` ) OR a.`time` > t.`timestamp` )
-            ORDER BY t.`timestamp` DESC, t.`id` DESC LIMIT 1;',
-            [ $identity_id, $maxtimestamp ]
+            'WITH
+                args AS ( SELECT ? AS `identity_id`, ? AS `opp_id` ),
+                dta  AS (
+                    SELECT r.`id`,
+                           r.`identity_id`,
+                           r.`timestamp`,
+                           ROW_NUMBER() OVER ( PARTITION BY r.`identity_id`, r.`opp_id` ORDER BY r.`timestamp` DESC, r.`id` DESC ) AS `r`,
+                           IF( a.`opp_id` IS NULL, r.`allstreak`, r.`oppstreak` ) AS `streak`,
+                           IF( a.`opp_id` IS NULL, r.`maxallstreak`, r.`maxoppstreak` ) AS `maxstreak`
+                    FROM   `vgame_result` r
+                    JOIN   args a ON 1 = 1
+                    WHERE  ( r.`identity_id` = a.`identity_id` AND ( a.`opp_id` IS NULL OR r.`opp_id` = a.`opp_id` ) ) OR ( r.`identity_id` = a.`opp_id` AND r.`opp_id` = a.`identity_id` )
+                )
+            SELECT   *
+            FROM     dta
+            WHERE    1 = `r`
+            ORDER BY `timestamp` DESC, `id` DESC LIMIT 2;',
+            [ $identity_id, $opp_id ]
         );
-        if ( $c = $q->fetch() ) { $response = $c; }
+        if ( $c = $q->fetch() )
+        {
+            $response = [ null, null ];
+            do
+            {
+                $response[ $c->identity_id == $identity_id ? 0 : 1 ] = (object) [ 'streak' => $c->streak, 'maxstreak' => $c->maxstreak ];
+            }
+            while ( !is_null( $opp_id ) && $c = $q->fetch() );
+        }
+
+        //if ( $c = $q->fetch() ) { $response = $c; }
         return $response;
     }
 
@@ -27,7 +50,7 @@ class _GamerecordModel extends Model
         $a = [ null, null ];
         /* query */
         $q = $this->run(
-            'SELECT `identity_id`, `iswin`, `roundcount`, `score`, `minscore`, `maxscore`, `avgscore`, `streak`, `maxstreak` FROM `vgame_result` WHERE ? = `game_id` LIMIT 2',
+            'SELECT `identity_id`, `iswin`, `roundcount`, `score`, `minscore`, `maxscore`, `avgscore`, `oppstreak`, `maxoppstreak` FROM `vgame_result` WHERE ? = `game_id` LIMIT 2',
             [ $gid ]
         );
         /* set both player and opponent records to response */
@@ -47,8 +70,8 @@ class _GamerecordModel extends Model
                     'mns' => $o->minscore,
                     'mxs' => $o->maxscore,
                     'avs' => (float) $o->avgscore,
-                    'st'  => $o->streak,
-                    'mst' => $o->maxstreak
+                    'st'  => $o->oppstreak,
+                    'mst' => $o->maxoppstreak
                 ], $a )
             ];
         }

@@ -1,18 +1,19 @@
 /* imports */
-import Controller         from './controller.js';
-import AppModel           from '../model/appmodel.js';
-import AppView            from '../view/appview.js';
+import Controller           from './controller.js';
+import AppModel             from '../model/appmodel.js';
+import AppView              from '../view/appview.js';
 
-import ServiceController  from './servicecontroller.js';
-import PulldownController from './pulldowncontroller.js';
-import IdentityController from './identitycontroller.js';
-import MainmenuController from './mainmenucontroller.js';
-import LobbyController    from './lobbycontroller.js';
-import GameListController from './gamelistcontroller.js';
-import GameController     from './gamecontroller.js';
-import AboutController    from './aboutcontroller.js';
-import EndController      from './endcontroller.js';
-import ModalController    from './modalcontroller.js';
+import ServiceController    from './servicecontroller.js';
+import PulldownController   from './pulldowncontroller.js';
+import IdentityController   from './identitycontroller.js';
+import MainmenuController   from './mainmenucontroller.js';
+import LobbyController      from './lobbycontroller.js';
+import GameListController   from './gamelistcontroller.js';
+import GameController       from './gamecontroller.js';
+import AboutController      from './aboutcontroller.js';
+import GamestatusController from './gamestatuscontroller.js';
+import ModalController      from './modalcontroller.js';
+import SvgCharController    from './svgcharcontroller.js';
 
 export default class AppController extends Controller
 {
@@ -29,7 +30,7 @@ export default class AppController extends Controller
         this._gamelist  = new GameListController();
         this._game      = new GameController();
         this._about     = new AboutController();
-        this._end       = new EndController();
+        this._status    = new GamestatusController();
 
         /* apply bindings */
         /* give controllers access to route() */
@@ -39,7 +40,7 @@ export default class AppController extends Controller
         this._lobby   .bindRoute( this.route );
         this._gamelist.bindRoute( this.route );
         this._game    .bindRoute( this.route );
-        this._end     .bindRoute( this.route );
+        this._status  .bindRoute( this.route );
         /* push service */
         this._mainmenu.bindInitPushService( this.initPushService );
         /* sync event */
@@ -54,6 +55,9 @@ export default class AppController extends Controller
         this._gamelist.bindIsPushSubscribe( this.isPushSubscribe );
         /* reset badges */
         this._gamelist.bindSetAppBadge( this.setAppBadge );
+        /* force game to close */
+        this._gamelist.bindCloseGameByGid( this.closeGameByGid );
+
         /* bind model update events */
         this._lobby   .bindSetGidDetail( this.setGidDetail );
         this._game    .bindSetGidDetail( this.setGidDetail );
@@ -63,25 +67,16 @@ export default class AppController extends Controller
         this._lobby   .bindIdName( this.idName );
         this._lobby   .bindIdAvatar( this.idAvatar );
         this._lobby   .bindIdStat( this.idStat );
-        this._end     .bindIdName( this.idName );
-        this._end     .bindIdAvatar( this.idAvatar );
-        this._end     .bindPopMenu( this.handlePopMenu );
+        this._status  .bindIdName( this.idName );
+        this._status  .bindIdAvatar( this.idAvatar );
+        this._status  .bindPopMenu( this.handlePopMenu );
         this._mainmenu.bindIdName( this.idName );
         this._mainmenu.bindIdAvatar( this.idAvatar );
         this._mainmenu.bindIdStat( this.idStat );
         this._identity.bindPopMenu( this.handlePopMenu );
         this._identity.bindServicesConnect( this.servicesConnect );
-        this._identity.bindSetPulldownState( this._setPulldownState );
 
         this.model.bindNotifyListChanged( this.onNotifyListChanged );
-
-        /* detect offline/online (not really working yet) */
-        //window.addEventListener( 'online',  () => this._updateOnlineStatus() );
-        //window.addEventListener( 'offline', () => this._updateOnlineStatus() );
-        //document.getElementById( 'pulldown-menu' ).addEventListener( 'onclick', () => {
-        //    this.initPushService();
-        //    document.getElementById( 'pulldown-menu' ).removeEventListener( 'onclick' );
-        //}, 1 )
 
         /* track a running notification */
         this.isnotify = this.view.showNotify;
@@ -97,14 +92,12 @@ export default class AppController extends Controller
 
     launch()
     {
+        /* trigger startup events if we're not starting from the about view */
+        if ( !window.location.pathname.toLowerCase().startsWith( '/about' ) ) this.playIntro().then( () => this.remindCookies() );
         /* route application to proper place */
         this.route();
         /* connect to service and establish events */
         this.servicesConnect();
-
-        this.remindCookies();
-        /* detect online status (disabled) */
-        //this._updateOnlineStatus();
     }
 
     /* confirm version matches and reload application as necessary */
@@ -137,10 +130,10 @@ export default class AppController extends Controller
         }
     }
 
-    remindCookies = ( force = !this.model.cookiewarning ) =>
+    remindCookies = ( run = !this.model.cookiewarning ) =>
     {
         /* run first time warnings if needed */
-        if ( force )
+        if ( run )
         {
             setTimeout( () =>
             {
@@ -150,16 +143,35 @@ export default class AppController extends Controller
         }
     }
 
-    remindAppInstall = ( force = !this.model.installappreminder ) =>
+    /* play game intro screen if boolean is set and user is not logged in (first launch) */
+    playIntro = ( run = this.model.doPlayIntro && null == this._identity.name ) => this._promise()
+        .then( () =>
+        {
+            /* return without playing if not set */
+            if ( !run ) return;
+            /* run the intro screen */
+            const intro = this.view.createIntro();
+            /* return promise that resolves after intro screen completes */
+            return this._delay( 7500 ).then( () =>
+            {
+                /* remove completed intro object from DOM */
+                intro.remove();
+                /* disable playintro boolean */
+                this.model.doPlayIntro = false;
+            } )
+        } )
+
+
+    remindAppInstall = ( run = !this.model.installappreminder ) =>
     {
-        if ( force && ( 'standalone' in window.navigator ) && !window.navigator.standalone )
+        if ( run && ( 'standalone' in window.navigator ) && !window.navigator.standalone )
         {
             setTimeout( () =>
             {
                 this.modal( [
                     'install app', this.view.create( 'br' ),
                     'to home screen!', this.view.create( 'br' ),
-                    this.view.create( 'span', { class: 'action-icon' } ), ' > add to home screen'
+                    SvgCharController.svg( 'action-icon' ), ' > add to home screen'
                 ] );
                 /* confirm */
                 this.model.installappreminder = true;
@@ -222,6 +234,9 @@ export default class AppController extends Controller
         {
             case 'g':
                 this.openGame( route[ 1 ] );
+                break;
+            case 's':
+                this.openGamedetail( route[ 1 ] );
                 break;
             case 'i':
                 this.openInvite( route[ 1 ] );
@@ -311,6 +326,11 @@ export default class AppController extends Controller
             this.pushState( '/about/privacy', 'privacy' );
             view = this._about.createPrivacyView();
         }
+        else if ( 'license' == page )
+        {
+            this.pushState( '/about/license', 'license' );
+            view = this._about.createLicenseView();
+        }
         else
         {
             this.pushState( '/about', 'about' );
@@ -333,7 +353,7 @@ export default class AppController extends Controller
     handleOpenIdentityCreate = ( ) =>
     {
         /* redirect if we are logged in */
-        if ( this._identity.name ) { this.route( `/identity/update`, true ); return; }
+        if ( null != this._identity.name ) { this.route( `/identity/update`, true ); return; }
         /* lock and skip routing if we're at the about view */
         if ( window.location.pathname.startsWith( `/about` ) ) { this.lockMenu(); return; }
         /* clear out views */
@@ -360,7 +380,7 @@ export default class AppController extends Controller
     handleOpenIdentityUpdate = ( ) =>
     {
         /* redirect if we are not logged in */
-        if ( !this._identity.name ) { this.route( `/identity/create`, true ); return; }
+        if ( null == this._identity.name ) { this.route( `/identity/create`, true ); return; }
         const view = this._identity.createUpdateView();
         /* update path */
         this.pushState( `/identity/update`, 'update identity' );
@@ -412,14 +432,14 @@ export default class AppController extends Controller
                 else { this.route( '/g/' + o.gid ) }
             }
             /* if the request failed but we appear to be logged on */
-            else if ( this._identity.name ) { this.route( '/', true ) }
+            else if ( null != this._identity.name ) { this.route( '/', true ) }
         } );
     }
 
     openEnd = ( gid = null ) =>
     {
         /* generate a fresh lobby view */
-        const view = this._end.createView();
+        const view = this._status.createView();
         /* set pulldown state properties */
         const pdstate = this._setPulldownState( true, true, null, true );
         /* append view to pulldown menu - call popState on close */
@@ -430,7 +450,7 @@ export default class AppController extends Controller
             this.popState();
         } );
         /* open end screen from server */
-        this._end.fetchEnd( gid ).then( g =>
+        this._status.fetchInfo( gid ).then( g =>
         {
             if ( g?.g )
             {
@@ -440,7 +460,35 @@ export default class AppController extends Controller
                 else { this.route( '/g/' + g.g, true ) }
             }
             /* if the request failed but we appear to be logged on */
-            else if ( this._identity.name ) { this.route( '/', true ) }
+            else if ( null != this._identity.name ) { this.route( '/', true ) }
+        } );
+    }
+
+    openGamedetail = ( gid = null ) =>
+    {
+        /* generate a fresh lobby view */
+        const view = this._status.createView();
+        /* set pulldown state properties */
+        const pdstate = this._setPulldownState( true, true, null, true );
+        /* append view to pulldown menu - call popState on close */
+        this._pulldown.appendView( view, () =>
+        {
+            /* revert pulldown state properties */
+            this._setPulldownState( ...pdstate );
+            this.popState();
+        } );
+        /* fetch game info from server */
+        this._status.fetchInfo( gid ).then( g =>
+        {
+            /* if game was found */
+            if ( g?.g )
+            {
+                if      ( 'end' == g?.st    ) { this.route( '/r/' + g.g, true ) }
+                else if ( 'invite' == g?.st ) { this.route( '/i/' + g.g, true ) }
+                else    { this.pushState( '/s/' + g.g, 'open game: ' + g.name ) }
+            }
+            /* if the request failed but we appear to be logged on */
+            else if ( null != this._identity.name ) { this.route( '/', true ) }
         } );
     }
 
@@ -484,8 +532,19 @@ export default class AppController extends Controller
                 this.remindAppInstall();
             }
             /* if the request failed but we appear to be logged on */
-            else if ( this._identity.name ) { this.route( '/', true ) }
+            else if ( null != this._identity.name ) { this.route( '/', true ) }
         } );
+    }
+
+    /* close a game if it is open in stack */
+    closeGameByGid = ( gid ) =>
+    {
+        if ( gid == this._game.gid )
+        {
+            this._game.clear();
+            this.dropGameView();
+            //this.lastState[ 0 ] = [ '/', 'cribb.app' ];
+        }
     }
 
     /* get logged in user info */
@@ -630,9 +689,9 @@ export default class AppController extends Controller
     initVisibilitySync = () => !document.onvisibilitychange && ( document.onvisibilitychange = () => document.visibilityState === 'visible' && this.sync() );
 
     /* establish a web push subscription if necessary */
-    initPushService = ( force = !this.model.isPnSubscribe ) =>
+    initPushService = ( run = !this.model.isPnSubscribe ) =>
     {
-        if ( force )
+        if ( run )
         {
             this._service.pnSubscribe();
             this.model.isPnSubscribe = true;
@@ -662,11 +721,10 @@ export default class AppController extends Controller
         }
     }
 
-
     servicesConnect = () =>
     {
         /* don't do anything if we aren't logged in */
-        if ( !this._identity.name ) { this.route( '/identity/create' ); return; }
+        if ( null == this._identity.name ) { this.route( '/identity/create' ); return; }
         /* reconnect the sync services */
         /* sync when site is foregrounded */
         this.initVisibilitySync();

@@ -174,10 +174,10 @@ export default class AvatarView extends View
     {
         if ( enable )
         {
-            const pdstate = this.setPulldownState( null, false );
+            //const pdstate = this.setPulldownState( null, false );
             this.radialmenu.classList.add( 'show' );
             this.rddropdown.classList.add( 'show' );
-            this.radialmenu.onshowloss = () => { this.setPulldownState( ...pdstate ) }
+            this.radialmenu.onshowloss = () => { }
         }
         else
         {

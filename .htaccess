@@ -13,6 +13,11 @@ RewriteEngine On
 RewriteCond %{QUERY_STRING} ^(.*)&?vers=[^&]*&?(.*)$ [NC]
 RewriteRule ^/?(.*)$ /$1?%1%2 [L]
 
+# set utf-8 encoding explicitly in LICENSE
+<Files "LICENSE">
+    Header Set Content-Type "text/css; charset=utf-8"
+</Files>
+
 # app redirections
 
 # PRODUCTION MODE (UNCOMMENT THESE RULES IN PROD)
@@ -26,12 +31,14 @@ RewriteRule ^/?(.*)$ /$1?%1%2 [L]
 # redirect styles.css to php
 RewriteRule ^css/style.css(.*)$ css/style.php [L,NC]
 
-# deliver asset/css/js/.version to client directly without routing through php application
+# deliver to client directly without routing through php application
 RewriteRule ^asset/? - [L,NC]
 RewriteRule ^css/? - [L,NC]
 RewriteRule ^js/? - [L,NC]
 RewriteRule ^dist/? - [L,NC]
 RewriteRule ^\.version$ - [L,NC]
+RewriteRule ^LICENSE$ - [L,NC]
+RewriteRule ^vendor/license/? - [L,NC]
 # exempt tls directory
 RewriteRule ^\.well-known/? - [L,NC]
 
@@ -44,13 +51,3 @@ RewriteRule ^([^/]+/)*favicon\.ico$ - [R=404,L,NC]
 #RewriteCond %{REQUEST_FILENAME} !-d
 # route any other requests through index.php
 RewriteRule ^(.*)$ index.php?load=$1 [L,PT,QSA]
-
-## implicit .php in path
-## if the file doesnt exist
-#RewriteCond %{REQUEST_FILENAME} !-f
-## if the directory doesnt exist
-#RewriteCond %{REQUEST_FILENAME} !-d
-## and if there is a path.php file
-#RewriteCond %{REQUEST_FILENAME}\.php -f
-## remap url to the php file
-#RewriteRule ^(.*)$ $1.php

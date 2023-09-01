@@ -13,3 +13,4 @@ dedication.json
 changelog.json
 /vendor/*
 /js/vendor/*
+/external-libraries/*

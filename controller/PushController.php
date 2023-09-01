@@ -56,7 +56,7 @@ class PushController extends Controller
         /* loop through pending notifications */
         while ( $notification = $list->fetch() )
         {
-            /* encrypt a notification payload */
+            /* create and encrypt a notification payload */
             $message  = encryption::encrypt(
                 json_encode( $this->_buildTurnUpdatePayload( $notification->p2_name, $notification->game_id, $notification->badge ) ),
                 $notification->key,
@@ -70,8 +70,12 @@ class PushController extends Controller
             /* add request to queue */
             $curl->request( $notification->endpoint, 'POST', $message->cipherText, $headers, null, $callback );
         }
+        /* be sure to close cursor to avoid issues */
+        $list->closeCursor();
         /* execute pending curl requests */
         $curl->execute();
+        /* delete any revoked subscriptions */
+        $this->_model->flushDroppedSubscriptions();
     }
 
     /* return a turn update notification for frontend */

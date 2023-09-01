@@ -15,10 +15,6 @@
 .screen.top, .screen.bottom { z-index: 1; }
 .screen.mid { z-index: 2; }
 */
-#dragmap { z-index: 3; }
-#dragmap.enable { display: block; }
-/* push pulldown menu behind cards if dragging is happening */
-#dragmap.enable ~ .screen.mid > #pulldown-menu { z-index: 1; }
 
 /* cardsrow layers */
 .cardsrow { z-index: 2; }

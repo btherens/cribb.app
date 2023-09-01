@@ -12,8 +12,6 @@ define( 'CREDITS', rtrim( @file_get_contents( 'credits.json' ) ) );
 define( 'DEDICATION', rtrim( @file_get_contents( 'dedication.json' ) ) );
 /* CHANGELOG: render app changes */
 define( 'CHANGELOG', rtrim( @file_get_contents( 'changelog.json' ) ) );
-/* pushlock name */
-define( 'PUSHLOCK', 'pushservice.lock' );
 
 /* includes necessary script files by object name, on demand and only if class has not already been loaded */
 function basic_autoload( $class )
