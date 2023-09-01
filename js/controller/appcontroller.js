@@ -54,6 +54,9 @@ export default class AppController extends Controller
         this._gamelist.bindIsPushSubscribe( this.isPushSubscribe );
         /* reset badges */
         this._gamelist.bindSetAppBadge( this.setAppBadge );
+        /* force game to close */
+        this._gamelist.bindCloseGameByGid( this.closeGameByGid );
+
         /* bind model update events */
         this._lobby   .bindSetGidDetail( this.setGidDetail );
         this._game    .bindSetGidDetail( this.setGidDetail );
@@ -237,6 +240,9 @@ export default class AppController extends Controller
         {
             case 'g':
                 this.openGame( route[ 1 ] );
+                break;
+            case 's':
+                this.openGamedetail( route[ 1 ] );
                 break;
             case 'i':
                 this.openInvite( route[ 1 ] );
@@ -450,7 +456,7 @@ export default class AppController extends Controller
             this.popState();
         } );
         /* open end screen from server */
-        this._status.fetchEnd( gid ).then( g =>
+        this._status.fetchInfo( gid ).then( g =>
         {
             if ( g?.g )
             {
@@ -458,6 +464,34 @@ export default class AppController extends Controller
                 if   ( 'end' == g?.st ) { this.pushState( '/r/' + g.g, 'results' ) }
                 /* open as a game if we found a game in the wrong state */
                 else { this.route( '/g/' + g.g, true ) }
+            }
+            /* if the request failed but we appear to be logged on */
+            else if ( null != this._identity.name ) { this.route( '/', true ) }
+        } );
+    }
+
+    openGamedetail = ( gid = null ) =>
+    {
+        /* generate a fresh lobby view */
+        const view = this._status.createView();
+        /* set pulldown state properties */
+        const pdstate = this._setPulldownState( true, true, null, true );
+        /* append view to pulldown menu - call popState on close */
+        this._pulldown.appendView( view, () =>
+        {
+            /* revert pulldown state properties */
+            this._setPulldownState( ...pdstate );
+            this.popState();
+        } );
+        /* fetch game info from server */
+        this._status.fetchInfo( gid ).then( g =>
+        {
+            /* if game was found */
+            if ( g?.g )
+            {
+                if      ( 'end' == g?.st    ) { this.route( '/r/' + g.g, true ) }
+                else if ( 'invite' == g?.st ) { this.route( '/i/' + g.g, true ) }
+                else    { this.pushState( '/s/' + g.g, 'open game: ' + g.name ) }
             }
             /* if the request failed but we appear to be logged on */
             else if ( null != this._identity.name ) { this.route( '/', true ) }
@@ -506,6 +540,17 @@ export default class AppController extends Controller
             /* if the request failed but we appear to be logged on */
             else if ( null != this._identity.name ) { this.route( '/', true ) }
         } );
+    }
+
+    /* close a game if it is open in stack */
+    closeGameByGid = ( gid ) =>
+    {
+        if ( gid == this._game.gid )
+        {
+            this._game.clear();
+            this.dropGameView();
+            //this.lastState[ 0 ] = [ '/', 'cribb.app' ];
+        }
     }
 
     /* get logged in user info */
