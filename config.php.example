@@ -1,0 +1,23 @@
+<?php
+/*
+ * config.php template
+ * environment variables and definitions
+ */
+
+/* REQUIRED VARIABLES */
+/* MySQL variables */
+define( 'DB_HOST', 'mysqlserver' );
+define( 'DB_NAME', 'cribdb' );
+define( 'DB_USER', 'cribdb-php' );
+define( 'DB_PASS', 'your-password' );
+define( 'APP_TIMEZONE', 'America/Chicago' );
+
+/* shortID salt - scramble game ids with server unique salt */
+define( 'SHORTID_SALT', 'random' );
+/* BASEDNS: the URL to use */
+define( 'BASEDNS', 'your.url' );
+
+/* use this path for links to source code (leave blank to hide source code reference in footer) */
+define( 'SOURCECODEURL','https://github.com/btherens/cribb.app' );
+/* use this name for author reprentation in credits */
+define( 'SOURCEAUTHOR', 'name' );
