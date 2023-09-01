@@ -22,7 +22,7 @@ class GameController extends Controller
     public function invite( $gid ): void { $this->_gidPageLoader( $gid, 'cribbage challenge!' ); }
     public function game(   $gid ): void { $this->_gidPageLoader( $gid, 'open game' ); }
     public function result( $gid ): void { $this->_gidPageLoader( $gid, 'results' ); }
-    public function status( $gid ): void { $this->_gidPageLoader( $gid, 'game details' ); }
+    public function status( $gid ): void { $this->_gidPageLoader( $gid, 'open game' ); }
     private function _gidPageLoader( $gid, string $title ): void
     {
         /* validate gid value */
@@ -68,37 +68,27 @@ class GameController extends Controller
                     {
                         /* get gid direct from model */
                         $gid = shortID::toShort( $game->game_id );
-                        /* valid lobby */
-                        if ( -1 == $game->round )
+
+                        /* get settings info */
+                        $setting = $this->_deserializeLobbySetting( $game->setting, $game->p1_id != $id || $game->p_index != 1 );
+                        /* detect opponent */
+                        if ( $oppid = $game->p2_id ?? ( $game->p1_id != $this->_model->identity ? $game->p1_id : null ) )
                         {
-                            /* get settings info */
-                            $setting = $this->_deserializeLobbySetting( $game->setting, $game->p1_id != $id || $game->p_index != 1 );
-                            /* detect opponent */
-                            if ( $oppid = $game->p2_id ?? ( $game->p1_id != $this->_model->identity ? $game->p1_id : null ) )
-                            {
-                                /* get opponent record */
-                                $oppdtl = $this->_model->getIdDtl( $oppid );
-                                /* load opponent stats if ranked mode is on */
-                                if ( $setting[ 'rank' ] ) { $stats = $this->_getPlayerRecord( $oppid ); }
-                            }
-                            $response = [
-                                'gid'    => $gid,
-                                'se'     => $setting,
-                                'type'   => 'invite',
-                                /* opponent details */
-                                'name'   => isset( $oppdtl ) ? $oppdtl->name : null,
-                                'avatar' => isset( $oppdtl ) ? array_values( array_slice( ( (array) $oppdtl ), -16 ) ) : null,
-                                'stat'   => isset( $stats  ) ? $stats : null
-                            ];
+                            /* get opponent record */
+                            $oppdtl = $this->_model->getIdDtl( $oppid );
+                            /* load opponent stats if ranked mode is on */
+                            if ( $setting[ 'rank' ] ) { $stats = $this->_getPlayerRecord( $this->_model->identity, $oppid ); }
                         }
-                        /* game-in-progress */
-                        else
-                        {
-                            $response = [
-                                'gid'  => $gid,
-                                'type' => 'game'
-                            ];
-                        }
+                        $response = [
+                            'gid'    => $gid,
+                            'se'     => $setting,
+                            /* return view type invite / game / end */
+                            'type'   => -1 == $game->round ? 'invite' : ( 0 <= $game->round ? 'game' : 'end' ),
+                            /* opponent details */
+                            'name'   => isset( $oppdtl ) ? $oppdtl->name : null,
+                            'avatar' => isset( $oppdtl ) ? array_values( array_slice( ( (array) $oppdtl ), -16 ) ) : null,
+                            'stat'   => isset( $stats  ) ? $stats : null
+                        ];
                     }
                 }
                 catch ( Exception $e ) { http_response_code( 500 ); } 
@@ -173,13 +163,14 @@ class GameController extends Controller
     }
 
     /* get a game's state */
-    public function getEnd( $cmd ): void
+    public function getInfo( $cmd ): void
     {
         try
         {
             /* get game state from model */
             if ( $response = $this->_getGameState( $this->_filterGid( $_GET[ 'g' ] ) ) )
             {
+                $game = &$this->_model->game;
                 if ( 'end' == $response[ 'st' ] )
                 {
                     /* has a new game been started */
@@ -190,10 +181,14 @@ class GameController extends Controller
                     {
                         $response[ 'stat' ] = $this->_getGameRecord();
                     }
-                    /* load avatar into response */
-                    $id = $this->_model->getIdDtl( $this->_model->game->p2_id );
-                    $response[ 'av' ] = array_values( array_slice( ( (array) $id ), -16 ) );
                 }
+                else if ( $response[ 'se' ][ 'rank' ] )
+                {
+                    $response[ 'stat' ] = $this->_getPlayerRecord( $game->p1_id, $game->p2_id );
+                }
+                /* load avatar into response */
+                $id = $this->_model->getIdDtl( $game->p2_id );
+                $response[ 'av' ] = array_values( array_slice( ( (array) $id ), -16 ) );
             }
             else { $response = [ 'success' => false ]; }
         }
