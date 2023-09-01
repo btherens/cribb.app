@@ -9,7 +9,7 @@ export default class GamestatusView extends View
     }
 
     /* return a lobby view */
-    createEndView()
+    createInfoView()
     {
         /* define header and view and return */
         this.header = this.create( 'span', { class: 'pd-header' }, 'results' );
@@ -17,7 +17,7 @@ export default class GamestatusView extends View
         return this.create( 'div', { class: 'flex-container column', onclick: e => e.stopPropagation() }, [ this.header, this.view ] );
     }
 
-    displayEndView(
+    displayInfoView(
         box1,
         box2,
         button
