@@ -1,18 +1,19 @@
 /* imports */
-import Controller         from './controller.js';
-import AppModel           from '../model/appmodel.js';
-import AppView            from '../view/appview.js';
+import Controller           from './controller.js';
+import AppModel             from '../model/appmodel.js';
+import AppView              from '../view/appview.js';
 
-import ServiceController  from './servicecontroller.js';
-import PulldownController from './pulldowncontroller.js';
-import IdentityController from './identitycontroller.js';
-import MainmenuController from './mainmenucontroller.js';
-import LobbyController    from './lobbycontroller.js';
-import GameListController from './gamelistcontroller.js';
-import GameController     from './gamecontroller.js';
-import AboutController    from './aboutcontroller.js';
-import ModalController    from './modalcontroller.js';
+import ServiceController    from './servicecontroller.js';
+import PulldownController   from './pulldowncontroller.js';
+import IdentityController   from './identitycontroller.js';
+import MainmenuController   from './mainmenucontroller.js';
+import LobbyController      from './lobbycontroller.js';
+import GameListController   from './gamelistcontroller.js';
+import GameController       from './gamecontroller.js';
+import AboutController      from './aboutcontroller.js';
 import GamestatusController from './gamestatuscontroller.js';
+import ModalController      from './modalcontroller.js';
+import SvgCharController    from './svgcharcontroller.js';
 
 export default class AppController extends Controller
 {
@@ -74,17 +75,8 @@ export default class AppController extends Controller
         this._mainmenu.bindIdStat( this.idStat );
         this._identity.bindPopMenu( this.handlePopMenu );
         this._identity.bindServicesConnect( this.servicesConnect );
-        this._identity.bindSetPulldownState( this._setPulldownState );
 
         this.model.bindNotifyListChanged( this.onNotifyListChanged );
-
-        /* detect offline/online (not really working yet) */
-        //window.addEventListener( 'online',  () => this._updateOnlineStatus() );
-        //window.addEventListener( 'offline', () => this._updateOnlineStatus() );
-        //document.getElementById( 'pulldown-menu' ).addEventListener( 'onclick', () => {
-        //    this.initPushService();
-        //    document.getElementById( 'pulldown-menu' ).removeEventListener( 'onclick' );
-        //}, 1 )
 
         /* track a running notification */
         this.isnotify = this.view.showNotify;
@@ -106,8 +98,6 @@ export default class AppController extends Controller
         this.route();
         /* connect to service and establish events */
         this.servicesConnect();
-        /* detect online status (disabled) */
-        //this._updateOnlineStatus();
     }
 
     /* confirm version matches and reload application as necessary */
@@ -140,10 +130,10 @@ export default class AppController extends Controller
         }
     }
 
-    remindCookies = ( force = !this.model.cookiewarning ) =>
+    remindCookies = ( run = !this.model.cookiewarning ) =>
     {
         /* run first time warnings if needed */
-        if ( force )
+        if ( run )
         {
             setTimeout( () =>
             {
@@ -153,31 +143,35 @@ export default class AppController extends Controller
         }
     }
 
-    playIntro = ( force = this.model.doPlayIntro && null == this._identity.name ) => this._promise()
+    /* play game intro screen if boolean is set and user is not logged in (first launch) */
+    playIntro = ( run = this.model.doPlayIntro && null == this._identity.name ) => this._promise()
         .then( () =>
         {
-            if ( force )
+            /* return without playing if not set */
+            if ( !run ) return;
+            /* run the intro screen */
+            const intro = this.view.createIntro();
+            /* return promise that resolves after intro screen completes */
+            return this._delay( 7500 ).then( () =>
             {
-                const intro = this.view.createIntro();
-                return this._delay( 7500 ).then( () =>
-                {
-                    intro.remove();
-                    this.model.doPlayIntro = false;
-                } )
-            }
+                /* remove completed intro object from DOM */
+                intro.remove();
+                /* disable playintro boolean */
+                this.model.doPlayIntro = false;
+            } )
         } )
 
 
-    remindAppInstall = ( force = !this.model.installappreminder ) =>
+    remindAppInstall = ( run = !this.model.installappreminder ) =>
     {
-        if ( force && ( 'standalone' in window.navigator ) && !window.navigator.standalone )
+        if ( run && ( 'standalone' in window.navigator ) && !window.navigator.standalone )
         {
             setTimeout( () =>
             {
                 this.modal( [
                     'install app', this.view.create( 'br' ),
                     'to home screen!', this.view.create( 'br' ),
-                    this.view.create( 'span', { class: 'action-icon' } ), ' > add to home screen'
+                    SvgCharController.svg( 'action-icon' ), ' > add to home screen'
                 ] );
                 /* confirm */
                 this.model.installappreminder = true;
@@ -695,9 +689,9 @@ export default class AppController extends Controller
     initVisibilitySync = () => !document.onvisibilitychange && ( document.onvisibilitychange = () => document.visibilityState === 'visible' && this.sync() );
 
     /* establish a web push subscription if necessary */
-    initPushService = ( force = !this.model.isPnSubscribe ) =>
+    initPushService = ( run = !this.model.isPnSubscribe ) =>
     {
-        if ( force )
+        if ( run )
         {
             this._service.pnSubscribe();
             this.model.isPnSubscribe = true;
@@ -726,7 +720,6 @@ export default class AppController extends Controller
             this._lastsync = new Date();
         }
     }
-
 
     servicesConnect = () =>
     {
