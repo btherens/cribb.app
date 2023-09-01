@@ -19,6 +19,7 @@ export default class ListboxView extends View
         datacol1,
         datacol2,
         solo,
+        clickhandler,
         openoverlay
     ) => {
         /* define avatar box */
@@ -46,9 +47,16 @@ export default class ListboxView extends View
         else if ( 2 == altcolor ) { avdom.classList.add( 'nocolor' ) }
         if      ( highlight     ) { listbox.classList.add( 'new'  ) }
         if      ( solo          ) { listbox.classList.add( 'solo' ) }
-        if      ( openoverlay   ) { listbox.addEventListener( 'click',
-            e => openoverlay.classList.toggle( 'show' )
-        ) }
+        if      ( clickhandler || openoverlay )
+        {
+            listbox.addEventListener( 'click', ( e ) =>
+            {
+                /* trigger an attached clickhandler if openoverlay is open or not attached */
+                if   ( 'function' == typeof clickhandler ) { clickhandler( e ) }
+                /* otherwise toggle an overlay opening */
+                else { openoverlay?.classList.toggle( 'show' ) }
+            } )
+        }
 
         return listbox;
     }
@@ -57,11 +65,15 @@ export default class ListboxView extends View
         text,
         datacol1,
         datacol2,
-        clickhandler = e => e.stopPropagation()
+        clickhandler
     ) => ListboxView.create( 'div', {
         class: 'overlay',
         onpointerdown: e => this.captureClassFocus( e, 'show' ),
-        onclick: clickhandler
+        onclick: e =>
+        {
+            if ( typeof clickhandler == 'function' ) { clickhandler( e ) }
+            e.stopPropagation();
+        }
     }, [
         ListboxView.create( 'div', { class: 'info' },
             ListboxView.create( 'span', {}, '...' )
