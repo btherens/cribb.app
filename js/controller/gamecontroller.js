@@ -36,6 +36,8 @@ export default class GameController extends Controller
         this.model._importHash();
     }
 
+    get gid() { return this.model.gid }
+
     /* events */
     /* run updates after model changes */
     onModelChanged = (
@@ -663,14 +665,14 @@ export default class GameController extends Controller
             DragController.unbind( this.view.playerhand );
             this.view.opphand.isdragreorder = true;
         }
+        /* bind inactive drag to the starter */
+        DragController.bindInactive( sdomh )
         /* set oppmode to inverse if we're meant to transition between */
         this.view.showFullOppHand = require.oppmode ? !oppmode : oppmode;
 
         /* update floatscore properties */
         //this._updateFloatScore();
 
-        /* bind inactive drag to the starter if it is player's turn */
-        if ( it ) { DragController.bindInactive( sdomh ) }
         /* keep starter active */
         if ( actives?.includes( sdomh._game.index ) ) { sdomh.classList.add( DragController.classActive ) }
         /* always render starter in position */
@@ -1737,13 +1739,12 @@ export default class GameController extends Controller
     /* return a blank game view */
     createGameView( )
     {
-        /* create view */
-        const view = this.view.createGameView(
-            ButtonController.create(
-                'table',
-                { id: 'action-btn', disabled: 'disabled', tabindex: 0, onclick: this.handleClickButton }
-            )
+        const button = ButtonController.create(
+            'table',
+            { id: 'action-btn', disabled: 'disabled', tabindex: 0, onclick: this.handleClickButton }
         );
+        /* create view */
+        const view = this.view.createGameView( button );
         /* set gameview to draggable area */
         DragController.screen = view;
         /* return new view */
