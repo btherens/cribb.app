@@ -50,7 +50,7 @@ export default class GameListController extends Controller
         listItem.r ? ListboxController.tableSet( 'you',  listItem.opp.score[ 0 ].toString() ) : null,
         0,
         /* clickhandler */
-        //() => this.handleClickGame( l.gid, l.r ),
+        null,
         /* include open overlay */
         ListboxController.createListOverlay(
             null,
@@ -59,10 +59,14 @@ export default class GameListController extends Controller
                 SvgCharController.svg( 'delete' ),
                 {
                     class: 'red',
-                    onclick: ev => this._clickArchive( 
-                        ev.currentTarget.parentNode.parentNode.parentNode.parentNode,
-                        () => this.hideGame( listItem.gid )
-                    )
+                    onclick: ev =>
+                    {
+                        ev.stopPropagation();
+                        this._clickArchive( 
+                            ev.currentTarget.parentNode.parentNode.parentNode.parentNode,
+                            () => this.hideGame( listItem.gid ).then( () => this.closeGameByGid( listItem.gid ) )
+                        );
+                    }
                 }
             ),
             ListboxController.tableSet(
@@ -70,17 +74,29 @@ export default class GameListController extends Controller
                 SvgCharController.svg( 'action-icon' ),
                 {
                     class: 'green',
-                    onclick: () =>
+                    onclick: ev =>
                     {
-                        const c     = 'show';
-                        const shows = this.view.list.getElementsByClassName( c );
-                        while ( shows[ 0 ] ) { shows[ 0 ].classList.remove( c ) }
-                        this.handleClickGame( listItem.gid, listItem.r );
+                        ev.stopPropagation();
+                        this._closeAll();
+                        this.openGame( listItem.gid, listItem.r );
                     }
                 }
-            )
+            ),
+            ev =>
+            {
+                ev.stopPropagation();
+                this._closeAll();
+                listItem.r ? this.openGameStatus( listItem.gid ) : this.openGame( listItem.gid, listItem.r )
+            }
         )
     );
+
+    _closeAll = () =>
+    {
+        const c     = 'show';
+        const shows = this.view.list.getElementsByClassName( c );
+        while ( shows[ 0 ] ) { shows[ 0 ].classList.remove( c ) }
+    }
 
     _clickArchive = ( listbox, callback ) =>
     {
@@ -142,7 +158,9 @@ export default class GameListController extends Controller
     }
 
     /* route to game when clicked */
-    handleClickGame = ( gid, isgame ) => this.handleRoute( '/' + ( isgame ? 'g' : 'i' ) + '/' + gid );
+    openGame       = ( gid, isgame ) => this.handleRoute( '/' + ( isgame ? 'g' : 'i' ) + '/' + gid );
+    /* route to game status screen */
+    openGameStatus = ( gid ) => this.handleRoute( '/s/' + gid );
 
     /* bindings */
     bindRoute( handler ) { this.handleRoute = handler }

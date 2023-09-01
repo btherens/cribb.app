@@ -36,8 +36,9 @@ export default class LobbyController extends Controller
         liveRank   = this.model.liveRank,
         storeColor = this.model.storeColor,
         storeRank  = this.model.storeRank,
-        pstat      = this.idStat(),
-        ostat      = this.model.stat,
+        stat       = this.model.stat,
+        pstat      = stat ? stat[ 0 ] : null,
+        ostat      = stat ? stat[ 1 ] : null,
         /* lobby is in newgame mode if no opponent is attached */
         newmode    = !avatar
     ) => {

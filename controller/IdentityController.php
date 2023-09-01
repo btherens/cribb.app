@@ -104,8 +104,8 @@ class IdentityController extends Controller
             /* attempt to load credentials and confirm the identity is fully enabled */
             if ( $this->_challenge() && $this->_model->identity->enabled )
             {
-                $record   = new _GamerecordController( 0, $this->_model->identity->id, 0 );
-                $response = [ 'name' => $this->_model->getName(), 'stat' => $record->getPlayerRecord() ];
+                $record   = new _GamerecordController( 0, $this->_model->identity->id, null );
+                $response = [ 'name' => $this->_model->getName(), 'stat' => $record->getPlayerRecord()[ 0 ] ];
             }
         }
         catch ( Exception $e ) { http_response_code( 500 ); } 

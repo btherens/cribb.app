@@ -455,8 +455,14 @@ div:last-child > .list.tactile.board:last-child {
     width: 100%;
     display: table;
 }
+/*
+.avatar.list:has( ~ .overlay.show ) > svg { filter: grayscale(100%) brightness(30%); }
+.tactile:not( :has( input:disabled ) ):not( :has( .notebox ) ) * {
+    cursor: pointer;
+}
+*/
 
-.listbox > div:first-child:last-child {
+.listbox:not( :has( ~ .overlay.show ) ) > div:first-child:last-child {
     height: 100%;
 }
 
@@ -594,6 +600,9 @@ div:last-child > .list.tactile.board:last-child {
 }
 .list.tactile.board > .overlay.show .score {
     transform: translateY(0%);
+}
+.list.tactile.board > .listbox > div:first-child {
+    transition: height 0.1s ease-out;
 }
 /* fade-out avatar overlay */
 .list.tactile.board > .overlay > .info,

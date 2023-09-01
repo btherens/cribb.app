@@ -4,7 +4,7 @@ class _GamerecordController extends Controller
 {
 
     /* constructor */
-    public function __construct( int $gid, int $identity_id, int $opp_id )
+    public function __construct( int $gid, int $identity_id, ?int $opp_id )
     {
         $model = '_Gamerecord';
         parent::__construct( $model, [ $gid, $identity_id, $opp_id ] );
@@ -38,11 +38,12 @@ class _GamerecordController extends Controller
     }
 
     /* get a player's record */
-    public function getPlayerRecord( int $identity_id = null ): ?stdclass
+    public function getPlayerRecord( int $identity_id = null, int $opp_id = null ): ?array
     {
-        if ( is_null( $identity_id ) ) { $identity_id = $this->_action[ 1 ]; }
+        if ( is_null( $identity_id ) && !is_null( $this->_action[ 1 ] ) ) { $identity_id = $this->_action[ 1 ]; }
+        if ( is_null( $opp_id ) && !is_null( $this->_action[ 2 ] ) ) { $opp_id = $this->_action[ 2 ]; }
         /* load latest player record */
-        return $this->_model->getPlayerRecord( $identity_id );
+        return $this->_model->getPlayerRecord( $identity_id, $opp_id );
     }
 
 }
