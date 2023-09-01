@@ -6,7 +6,7 @@ const cacheApp     = 'localcache' + cacheVersion;
 const cacheGames   = 'gamecache'  + cacheVersion;
 
 /* cached paths */
-const app_urls   = [
+const app_urls     = [
     /* basic application */
     /* html */
     '/',
@@ -133,16 +133,18 @@ const clickNotification = ( event ) => {
     const url = event.notification.tag;
     /* close notification */
     event.notification.close();
-    /* collect all active app windows */
-    event.waitUntil( clients.matchAll( { type: 'window' } ).then( windowClients =>
-    {
-        /* 1) focus window if game is already open */
-        for ( let client of windowClients ) if ( new URL( client.url ).pathname == '/' + url ) { return client.focus() }
-        /* 2) navigate an existing window to game */
-        for ( let client of windowClients ) { return client.navigate( '/' + url ) }
-        /* 3) open a new window */
-        return clients.openWindow( '/' + url );
-    } ) );
+    /* attempt to improve game open reliability in iOS */
+    event.waitUntil( clients.openWindow( '/' + url ) );
+    /* collect all active app windows (disabled for now) */
+    //event.waitUntil( clients.matchAll( { type: 'window' } ).then( windowClients =>
+    //{
+    //    /* 1) focus window if game is already open */
+    //    for ( let client of windowClients ) if ( new URL( client.url ).pathname == '/' + url ) { return client.focus() }
+    //    /* 2) navigate an existing window to game */
+    //    for ( let client of windowClients ) { return client.navigate( '/' + url ) }
+    //    /* 3) open a new window */
+    //    return clients.openWindow( '/' + url );
+    //} ) );
 };
 
 /* process objects sent from app */
