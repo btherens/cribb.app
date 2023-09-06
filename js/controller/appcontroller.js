@@ -724,7 +724,7 @@ export default class AppController extends Controller
     servicesConnect = () =>
     {
         /* don't do anything if we aren't logged in */
-        if ( null == this._identity.name ) { this.route( '/identity/create' ); return; }
+        if ( null == this._identity.name ) { this._identity.sync(); return; }
         /* reconnect the sync services */
         /* sync when site is foregrounded */
         this.initVisibilitySync();
