@@ -68,9 +68,12 @@ export default class ListboxView extends View
                     clearDelay( e );
                 }, 250 );
             }
+            /* clear pending hold if pointer moves */
+            listbox.onpointermove = e => null != clickDelay && clearDelay( e );
+            /* execute clickhandler if click */
             listbox.onpointerup = e =>
             {
-                if ( e.clientY == scrollPos && clickDelay != null ) { clickhandler( e ) }
+                if ( e.clientY == scrollPos && null != clickDelay ) { clickhandler( e ) }
                 clearDelay( e );
             }
         }
