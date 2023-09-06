@@ -50,7 +50,12 @@ export default class GameListController extends Controller
         listItem.r ? ListboxController.tableSet( 'you',  listItem.opp.score[ 0 ].toString() ) : null,
         0,
         /* clickhandler */
-        null,
+        ev =>
+        {
+            ev.stopPropagation();
+            this._closeAll();
+            this.openGame( listItem.gid, listItem.r );
+        },
         /* include open overlay */
         ListboxController.createListOverlay(
             null,
@@ -86,7 +91,7 @@ export default class GameListController extends Controller
             {
                 ev.stopPropagation();
                 this._closeAll();
-                listItem.r ? this.openGameStatus( listItem.gid ) : this.openGame( listItem.gid, listItem.r )
+                this.openGame( listItem.gid, listItem.r );
             }
         )
     );
@@ -160,7 +165,7 @@ export default class GameListController extends Controller
     /* route to game when clicked */
     openGame       = ( gid, isgame ) => this.handleRoute( '/' + ( isgame ? 'g' : 'i' ) + '/' + gid );
     /* route to game status screen */
-    openGameStatus = ( gid ) => this.handleRoute( '/s/' + gid );
+    //openGameStatus = ( gid ) => this.handleRoute( '/s/' + gid );
 
     /* bindings */
     bindRoute( handler ) { this.handleRoute = handler }

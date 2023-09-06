@@ -49,13 +49,30 @@ export default class ListboxView extends View
         if      ( solo          ) { listbox.classList.add( 'solo' ) }
         if      ( clickhandler || openoverlay )
         {
-            listbox.addEventListener( 'click', ( e ) =>
+            let clickDelay, scrollPos;
+            let clearDelay = e =>
             {
-                /* trigger an attached clickhandler if openoverlay is open or not attached */
-                if   ( 'function' == typeof clickhandler ) { clickhandler( e ) }
-                /* otherwise toggle an overlay opening */
-                else { openoverlay?.classList.toggle( 'show' ) }
-            } )
+                e.stopPropagation();
+                e.preventDefault();
+                clearTimeout( clickDelay );
+                clickDelay = null;
+            }
+            listbox.onpointerdown = e =>
+            {
+                /* track pointer event vertical position for scroll cancellatiopn */
+                scrollPos  = e.clientY;
+                clickDelay = setTimeout( () =>
+                {
+                    /* open overlay */
+                    if ( e.clientY == scrollPos ) { openoverlay?.classList.toggle( 'show' ) }
+                    clearDelay( e );
+                }, 250 );
+            }
+            listbox.onpointerup = e =>
+            {
+                if ( e.clientY == scrollPos && clickDelay != null ) { clickhandler( e ) }
+                clearDelay( e );
+            }
         }
 
         return listbox;

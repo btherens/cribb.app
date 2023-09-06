@@ -35,11 +35,11 @@ export default class ServiceController extends Controller
         /* check for push permissions - requests if necessary */
         .then( () => this._pnCheckPermission() )
         /* service worker resolves when service worker is in place */
-        .then( () => navigator.serviceWorker.ready )
+        .then( () => navigator.serviceWorker?.ready )
         /* register push service using public key if we don't have one yet */
-        .then( service => service.pushManager.getSubscription() )
-        /* attempt to register new sub if no active subscription was returned */
-        .then( sub => sub || service?.pushManager.subscribe( { userVisibleOnly: true, applicationServerKey: this._urlBase64ToUint8Array( vapidkey ) } ) )
+        .then( service => service?.pushManager.getSubscription()
+            /* attempt to register new sub if no active subscription was returned */
+            .then( sub => sub || service?.pushManager.subscribe( { userVisibleOnly: true, applicationServerKey: this._urlBase64ToUint8Array( vapidkey ) } ) ) )
         /* save the subscription to service */
         .then( sub => sub && this._pnSetSubscription( sub ) );
 
@@ -78,7 +78,7 @@ export default class ServiceController extends Controller
     }
 
     /* clear all notifications for a given tag */
-    removeNotifications = ( tag ) => navigator.serviceWorker.ready
+    removeNotifications = ( tag ) => navigator.serviceWorker?.ready
         .then( service => service.getNotifications() )
         .then( notifications =>
         {
@@ -86,7 +86,7 @@ export default class ServiceController extends Controller
         } );
 
     /* set app badge count */
-    setAppBadge = ( n ) => navigator.serviceWorker.ready
+    setAppBadge = ( n ) => navigator.serviceWorker?.ready
         .then( service => service.active.postMessage( { badge: n } ) );
 
 }
