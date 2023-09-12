@@ -22,6 +22,9 @@ export default class AppView extends View
         this._notifyspan  = this._notifybar.children[ 0 ];
     }
 
+    /* enable screen in app launcher */
+    renderScreen = () => document.body.classList.remove( 'nodisplay' );
+
     createIntro = ( allowskip = false ) =>
     {
         const introdiv = this.create( 'div', { id: 'titleintro' }, this.create( 'div', {}, [

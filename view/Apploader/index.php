@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <?php include 'includes/head.php' ?>
-    <body tabindex="-1" class="" >
+    <body tabindex="-1" class="nodisplay" >
         <div id="dragmap" ></div>
         <div class="screen top" ><?php echo $board2; ?></div>
         <div class="screen mid show" >
