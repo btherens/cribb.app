@@ -90,10 +90,13 @@ export default class AppController extends Controller
         this.lastState = [];
     }
 
+    /* application startup - render display, play intro animation, internal app routing, enable sync */
     launch()
     {
         /* trigger startup events if we're not starting from the about view */
         if ( !window.location.pathname.toLowerCase().startsWith( '/about' ) ) this.playIntro().then( () => this.remindCookies() );
+        /* render display */
+        this.view.renderScreen();
         /* route application to proper place */
         this.route();
         /* connect to service and establish events */
@@ -144,13 +147,18 @@ export default class AppController extends Controller
     }
 
     /* play game intro screen if boolean is set and user is not logged in (first launch) */
-    playIntro = ( run = this.model.doPlayIntro && null == this._identity.name ) => this._promise()
+    playIntro = (
+        /* detect a first run: run intro if playintro flag not set and identity not yet synced */
+        firstrun  = this.model.doPlayIntro && null == this._identity.name,
+        /* run intro by default if loading home page */
+        isDefault = '/' == window.location.pathname
+    ) => this._promise()
         .then( () =>
         {
-            /* return without playing if not set */
-            if ( !run ) return;
-            /* run the intro screen */
-            const intro = this.view.createIntro();
+            /* do not play intro if neither flag is set */
+            if ( !isDefault && !firstrun ) return;
+            /* run the intro screen - disable skip if first run */
+            const intro = this.view.createIntro( !firstrun );
             /* return promise that resolves after intro screen completes */
             return this._delay( 7500 ).then( () =>
             {

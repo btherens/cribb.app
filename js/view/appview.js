@@ -22,13 +22,19 @@ export default class AppView extends View
         this._notifyspan  = this._notifybar.children[ 0 ];
     }
 
-    createIntro = () =>
+    /* enable screen in app launcher */
+    renderScreen = () => document.body.classList.remove( 'nodisplay' );
+
+    createIntro = ( allowskip = false ) =>
     {
         const introdiv = this.create( 'div', { id: 'titleintro' }, this.create( 'div', {}, [
             this.create( 'span', {}, 'cribb.app' ),
             this.create( 'span', {}, 'play cribbage with friends!' )
         ] ) );
         document.body.appendChild( introdiv );
+        /* skip intro screen early with click */
+        if ( allowskip ) introdiv.onclick = () => introdiv.remove();
+        /* return div for  */
         return introdiv;
     }
 
