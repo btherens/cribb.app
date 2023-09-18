@@ -62,25 +62,6 @@ const routeFetch = event =>
     event.respondWith( response().then( response => response || fetch( event.request ) ) )
 }
 
-/* stale-while-revalidate (not used) */
-const staleWhileRevalidate = ( event, cachename ) => event.respondWith(
-    caches.match( event.request )
-        .then( ( cacheResponse ) =>
-        {
-            const networkResponse = fetch( event.request )
-                .then( ( networkResponse ) =>                {
-                    return caches.open( cachename )
-                        .then( ( cache ) =>
-                        {
-                            cache.put( event.request, networkResponse.clone() );
-                            return networkResponse;
-                        } )
-                }
-            );
-            return cacheResponse || networkResponse;
-        } )
-);
-
 /* generates a new response with argument as JSON object */
 const jsonResponse = ( o ) => new Response( JSON.stringify( o ), { headers: { 'Content-Type' : 'application/json' } } );
 
@@ -125,7 +106,16 @@ const showNotification = ( event ) =>
 };
 
 /* set an app badge if method is available */
-const setAppBadge = ( n ) => new Promise( r => r() ).then( () => ( 'setAppBadge' in self.navigator ) && self.navigator.setAppBadge( n ) );
+const setAppBadge = ( n ) => new Promise( r => r() ).then( () =>
+{
+    if ( 'setAppBadge' in self.navigator )
+    {
+        /* clear badge first to prevent badge sum in iOS */
+        self.navigator.setAppBadge( 0 );
+        /* set app badge */
+        self.navigator.setAppBadge( n );
+    }
+} );
 
 /* open a notification */
 const clickNotification = ( event ) => {

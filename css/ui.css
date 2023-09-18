@@ -455,12 +455,6 @@ div:last-child > .list.tactile.board:last-child {
     width: 100%;
     display: table;
 }
-/*
-.avatar.list:has( ~ .overlay.show ) > svg { filter: grayscale(100%) brightness(30%); }
-.tactile:not( :has( input:disabled ) ):not( :has( .notebox ) ) * {
-    cursor: pointer;
-}
-*/
 
 .listbox:not( :has( ~ .overlay.show ) ) > div:first-child:last-child {
     height: 100%;
@@ -610,7 +604,11 @@ div:last-child > .list.tactile.board:last-child {
 .list.tactile.board > .overlay.show > .info,
 .list.tactile.board > .overlay.show .name { opacity: 1; }
 /* apply gray filter when overlay is open */
-.avatar.list:has( ~ .overlay.show ) > svg { filter: grayscale(100%) brightness(30%); }
+.avatar.list:has( ~ .overlay.show ) > svg {
+    filter: grayscale(100%) brightness(30%);
+    /* ios 17 filter rendering patch */
+    animation: filterfix 1s infinite;
+}
 
 .notebox {
     height: 100%;

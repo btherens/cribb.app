@@ -17,6 +17,8 @@
 .live-avatar > svg { filter: drop-shadow( 0 0.625rem 8px rgba(0,0,0,0.3) ); }
 /* performance: clear filter when menu is open */
 .radial-menu.show .live-avatar > svg { filter: none; }
+/* iOS 17 rendering bug */
+.radial-menu:not(.show) .live-avatar > svg { animation: filterfix 1s infinite; }
 
 /* radial dropdown sliders (sits over other controls) */
 .radial-dropdown

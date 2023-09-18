@@ -42,3 +42,6 @@ body {
     /* support fast-tap behavior in fullscreen safari web apps */
     touch-action: manipulation;
 }
+
+/* hide body during page load */
+body.nodisplay { opacity: 0; }

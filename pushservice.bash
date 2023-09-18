@@ -4,17 +4,16 @@
 function runservice() {
     # determine paths
     THISDIR="$(dirname "$(readlink -f "$0")")";
-    PUSHLOCK="$THISDIR/pushservice.lock";
-    PUSHRUN="$THISDIR/pushservice.php";
+    SERVICE="$THISDIR/pushservice";
     # delete lock if older than 90 minutes
-    # find "$PUSHLOCK" -type d -mmin +90 -exec rm -rdf {} \; >/dev/null 2>&1;
+    # find "$SERVICE.lock" -type d -mmin +90 -exec rm -rdf {} \; >/dev/null 2>&1;
     # lock folder
-    if mkdir "$PUSHLOCK";
+    if mkdir "$SERVICE.lock";
     then
         # run push service until we reach minute 59
-        while [ $(date "+%M") -lt 59 ]; do php "$PUSHRUN"; done;
+        while [ $(date "+%M") -lt 59 ]; do php "$SERVICE.php" 2>"$SERVICE.err"; done;
         # remove lock after service completes
-        if ! rmdir "$PUSHLOCK"; then >&2 echo "failed to release lock"; fi;
+        if ! rmdir "$SERVICE.lock"; then >&2 echo "failed to release lock"; fi;
     fi;
 }
 # call function
