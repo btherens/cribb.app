@@ -106,7 +106,16 @@ const showNotification = ( event ) =>
 };
 
 /* set an app badge if method is available */
-const setAppBadge = ( n ) => new Promise( r => r() ).then( () => ( 'setAppBadge' in self.navigator ) && self.navigator.setAppBadge( n ) );
+const setAppBadge = ( n ) => new Promise( r => r() ).then( () =>
+{
+    if ( 'setAppBadge' in self.navigator )
+    {
+        /* clear badge first to prevent badge sum in iOS */
+        self.navigator.setAppBadge( 0 );
+        /* set app badge */
+        self.navigator.setAppBadge( n );
+    }
+} );
 
 /* open a notification */
 const clickNotification = ( event ) => {
