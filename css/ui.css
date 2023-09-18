@@ -455,12 +455,6 @@ div:last-child > .list.tactile.board:last-child {
     width: 100%;
     display: table;
 }
-/*
-.avatar.list:has( ~ .overlay.show ) > svg { filter: grayscale(100%) brightness(30%); }
-.tactile:not( :has( input:disabled ) ):not( :has( .notebox ) ) * {
-    cursor: pointer;
-}
-*/
 
 .listbox:not( :has( ~ .overlay.show ) ) > div:first-child:last-child {
     height: 100%;
