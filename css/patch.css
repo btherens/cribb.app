@@ -13,3 +13,10 @@
     .tactile > input[type=text]:not(:focus) { border-radius: 0 calc(0.75em/0.7) calc(0.75em/0.7) 0; }
     .tactile > input[type=text]:focus { transition: background 150ms cubic-bezier(0, 0, 0.58, 1), width 150ms cubic-bezier(0, 0, 0.58, 1), font-size 150ms cubic-bezier(0, 0, 0.58, 1), border-radius 0s ease 150ms; }
 } }
+
+/* iOS 17.0 - address svg filter bugs
+ * add to an svg with filter rendering bugs
+ * svg.fix { animation: filterfix 1s infinite; }
+ */
+@keyframes filterfix { 100% { opacity: 1; } }
+/* add to an svg with filter rendering bugs - animation: filterfix 1s infinite; */
