@@ -1,6 +1,6 @@
 <?php
 
-/* provide encryption for web push and vapid header generation */
+/* web push encryption - message encryption and vapid header generation */
 class encryption
 {
 
@@ -45,6 +45,34 @@ class encryption
                 )
                 . $tag
         ];
+    }
+
+    /* build headers for a push request */
+    public static function buildHeaders( string $content, string $salt, string $localPublicKey, string $endpoint, string $encoding ): array
+    {
+        /* basic headers */
+        $headers = [
+            'Content-Type'     => 'application/octet-stream',
+            'TTL'              => 2419200,
+            'Content-Encoding' => $encoding,
+            'Content-Length'   => (string) mb_strlen( $content, '8bit' )
+        ];
+        /* create jwt using server-side vapid keys */
+        $jwt = self::buildJWT( $endpoint );
+        /* unique encoding headers */
+        if ( 'aesgcm' === $encoding )
+        {
+            $headers[ 'Authorization' ] = 'WebPush '   . $jwt;
+            $headers[ 'Crypto-Key' ]    = 'dh='        . Base64URL::encode( $localPublicKey ) . ';'
+                                        . 'p256ecdsa=' . self::vapidPublic();
+            $headers[ 'Encryption' ]    = 'salt='      . Base64URL::encode( $salt );
+        }
+        elseif ( 'aes128gcm' === $encoding )
+        {
+            $headers[ 'Authorization' ] = 'vapid t=' . $jwt . ', k=' . self::vapidPublic();
+        }
+        else   { throw new Exception( 'content encoding not supported' ); }
+        return $headers;
     }
 
     /* create a new JWT */
@@ -126,10 +154,9 @@ class encryption
         /* unpack data and determine length */
         $data       = mb_substr( bin2hex( $data ), 2, null, '8bit' );
         $dataLength = mb_strlen( $data, '8bit' );
+        /* [ x, y ] */
         return [
-            /* x */
             hex2bin( mb_substr( $data,    0, $dataLength / 2, '8bit' ) ),
-            /* y */
             hex2bin( mb_substr( $data, $dataLength / 2, null, '8bit' ) ),
         ];
     }
@@ -145,13 +172,10 @@ class encryption
         }
         else
         {
-            $details = openssl_pkey_get_details( openssl_pkey_new( [
-                'curve_name'       => 'prime256v1',
-                'private_key_type' => OPENSSL_KEYTYPE_EC,
-            ] ) );
-            $x = str_pad( $details[ 'ec' ][ 'x' ], 32, chr( 0 ), STR_PAD_LEFT );
-            $y = str_pad( $details[ 'ec' ][ 'y' ], 32, chr( 0 ), STR_PAD_LEFT );
-            $d = str_pad( $details[ 'ec' ][ 'd' ], 32, chr( 0 ), STR_PAD_LEFT );
+            $details = openssl_pkey_get_details( openssl_pkey_new( [ 'curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC ] ) );
+            $x       = str_pad( $details[ 'ec' ][ 'x' ], 32, chr( 0 ), STR_PAD_LEFT );
+            $y       = str_pad( $details[ 'ec' ][ 'y' ], 32, chr( 0 ), STR_PAD_LEFT );
+            $d       = str_pad( $details[ 'ec' ][ 'd' ], 32, chr( 0 ), STR_PAD_LEFT );
         }
         /* return key object with urlsafe encoded strings */
         return (object) [
@@ -167,9 +191,7 @@ class encryption
 
     private static function _getKey( $x, $y, $length = 32 ): string
     {
-        return "\04"
-            . str_pad( Base64URL::decode( $x ), $length, "\0", STR_PAD_LEFT )
-            . str_pad( Base64URL::decode( $y ), $length, "\0", STR_PAD_LEFT );
+        return "\04" . str_pad( Base64URL::decode( $x ), $length, "\0", STR_PAD_LEFT ) . str_pad( Base64URL::decode( $y ), $length, "\0", STR_PAD_LEFT );
     }
 
     /* convert json web key to public key pem */
@@ -223,7 +245,6 @@ class encryption
         if     ( 'aesgcm'    === $encoding ) { $info = 'Content-Encoding: auth' . chr( 0 ); }
         elseif ( 'aes128gcm' === $encoding ) { $info = 'WebPush: info' . chr( 0 ) . $userPublicKey . $localPublicKey; }
         else   { throw new Exception( 'content encoding not supported' ); }
-
         return self::_hkdf( $sharedSecret, $userAuthToken, $info, 32 );
     }
 
@@ -268,10 +289,8 @@ class encryption
         if ( '30' === mb_substr( $hex, 0, 2, '8bit' ) )
         {
             /* sequence types */
-            /* handling for 128+ */
             if   ( '81' === mb_substr( $hex, 2, 2, '8bit' ) ) { $hex = mb_substr( $hex, 6, null, '8bit' ); }
             else { $hex = mb_substr( $hex, 4, null, '8bit' ); }
-
             if   ( '02' === mb_substr( $hex, 0, 2, '8bit' ) )
             {
                 $Rl  = (int) hexdec( mb_substr( $hex, 2, 2, '8bit' ) );
@@ -291,11 +310,7 @@ class encryption
     /* remove hex padding */
     private static function _retrievePosInt( string $data ) : string
     {
-        while ( '00' === mb_substr( $data, 0, 2, '8bit' ) && '7f' < mb_substr( $data, 2, 2, '8bit' ) )
-        {
-            $data = mb_substr( $data, 2, null, '8bit' );
-        }
+        while ( '00' === mb_substr( $data, 0, 2, '8bit' ) && '7f' < mb_substr( $data, 2, 2, '8bit' ) ) { $data = mb_substr( $data, 2, null, '8bit' ); }
         return $data;
     }
-
 }

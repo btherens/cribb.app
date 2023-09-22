@@ -64,7 +64,7 @@ class PushController extends Controller
                 $notification->encoding
             );
             /* create headers */
-            $headers  = $this->_buildHeaders( $message->cipherText, $message->salt, $message->localPublicKey, $notification->endpoint, $notification->encoding );
+            $headers  = encryption::buildHeaders( $message->cipherText, $message->salt, $message->localPublicKey, $notification->endpoint, $notification->encoding );
             /* 410 status code callback */
             $callback = fn() => $this->_model->dropSubscription( $notification->id );
             /* add request to queue */
@@ -87,34 +87,6 @@ class PushController extends Controller
             'u' => 'g/' . shortID::toShort( $gid ),
             'b' => $badge
         ];
-    }
-
-    /* build and return headers for a push request */
-    private function _buildHeaders( string $content, string $salt, string $localPublicKey, string $endpoint, string $encoding ): array
-    {
-        /* basic headers */
-        $headers = [
-            'Content-Type'     => 'application/octet-stream',
-            'TTL'              => 2419200,
-            'Content-Encoding' => $encoding,
-            'Content-Length'   => (string) mb_strlen( $content, '8bit' )
-        ];
-        /* create jwt using server-side vapid keys */
-        $jwt = encryption::buildJWT( $endpoint );
-        /* unique encoding headers */
-        if ( 'aesgcm' === $encoding )
-        {
-            $headers[ 'Authorization' ] = 'WebPush '   . $jwt;
-            $headers[ 'Crypto-Key' ]    = 'dh='        . Base64URL::encode( $localPublicKey ) . ';'
-                                        . 'p256ecdsa=' . encryption::vapidPublic();
-            $headers[ 'Encryption' ]    = 'salt='      . Base64URL::encode( $salt );
-        }
-        elseif ( 'aes128gcm' === $encoding )
-        {
-            $headers[ 'Authorization' ] = 'vapid t=' . $jwt . ', k=' . encryption::vapidPublic();
-        }
-        else   { throw new Exception( 'content encoding not supported' ); }
-        return $headers;
     }
 
 }
