@@ -95,34 +95,34 @@ class easycurl {
     private function _rollingCurl( int $batchsize = null ): bool
     {
         /* use default window size if none / 0 was passed */
-        if ( !$batchsize ) { $batchsize = $this->batchsize; }
+        if  ( !$batchsize ) { $batchsize = $this->batchsize; }
         /* make sure the rolling window isn't greater than the # of urls */
-        if ( count( $this->requests ) < $batchsize ) { $batchsize = count( $this->requests ); }
+        if  ( count( $this->requests ) < $batchsize ) { $batchsize = count( $this->requests ); }
         /* generate CurlMultiHandle */
-        $master = curl_multi_init();
+        $cmh = curl_multi_init();
         /* initiate first block of requests */
-        for ( $i = 0; $i < $batchsize; $i++ ) { $this->_mapCurlRequest( $master, $this->requests, $i ); }
+        for ( $i = 0; $i < $batchsize; $i++ ) { $this->_mapCurlRequest( $cmh, $this->requests, $i ); }
         /* do block will run as long as curl_multi_exec returns running=true */
         do
         {
             /* keep loop open while curl has data to return */
-            while ( ( $execrun = curl_multi_exec( $master, $running ) ) == CURLM_CALL_MULTI_PERFORM )
+            while ( ( $execrun = curl_multi_exec( $cmh, $running ) ) == CURLM_CALL_MULTI_PERFORM )
             /* exit loop if something went wrong */
             if    ( $execrun != CURLM_OK ) { break; }
             /* process a request */
-            while ( $this->_processCurl( $master, $this->requests ) )
+            while ( $this->_processCurl( $cmh, $this->requests ) )
             {
                 /* start a new request */
                 if ( $i < count( $this->requests ) && isset( $this->requests[ $i ] ) )
                 {
-                    $this->_mapCurlRequest( $master, $this->requests, $i );
+                    $this->_mapCurlRequest( $cmh, $this->requests, $i );
                     $i++;
                 }
             }
             /* wait for activity */
-            if ( $running ) { curl_multi_select( $master, $this->timeout ); }
+            if ( $running ) { curl_multi_select( $cmh, $this->timeout ); }
         } while ( $running );
-        curl_multi_close( $master );
+        curl_multi_close( $cmh );
         return true;
     }
 
@@ -147,11 +147,7 @@ class easycurl {
         if ( $headers )
         {
             $options[ CURLOPT_HEADER ]     = 0;
-            $options[ CURLOPT_HTTPHEADER ] = array_map(
-                fn( $k, $v ) => $k.': '.$v,
-                array_keys( $headers ),
-                array_values( $headers )
-            );
+            $options[ CURLOPT_HTTPHEADER ] = array_map( fn( $k, $v ) => $k.': '.$v, array_keys( $headers ), array_values( $headers ) );
         }
         return $options;
     }
