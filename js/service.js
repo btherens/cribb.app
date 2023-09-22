@@ -106,16 +106,7 @@ const showNotification = ( event ) =>
 };
 
 /* set an app badge if method is available */
-const setAppBadge = ( n ) => new Promise( r => r() ).then( () =>
-{
-    if ( 'setAppBadge' in self.navigator )
-    {
-        /* clear badge first to prevent badge sum in iOS */
-        self.navigator.setAppBadge( 0 );
-        /* set app badge */
-        self.navigator.setAppBadge( n );
-    }
-} );
+const setAppBadge = ( n ) => new Promise( r => 'setAppBadge' in self.navigator && r() ).then( () => self.navigator.setAppBadge( n ) );
 
 /* open a notification */
 const clickNotification = ( event ) => {
@@ -123,7 +114,7 @@ const clickNotification = ( event ) => {
     const url = event.notification.tag;
     /* close notification */
     event.notification.close();
-    /* attempt to improve game open reliability in iOS */
+    /* open page */
     event.waitUntil( clients.openWindow( '/' + url ) );
     /* collect all active app windows (disabled for now) */
     //event.waitUntil( clients.matchAll( { type: 'window' } ).then( windowClients =>
