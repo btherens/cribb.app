@@ -8,11 +8,9 @@
         <meta property="og:image" content="/asset/board-icon@512x.png?vers=<?php echo VERSION; ?>" />
     <?php } ?>
     <link rel="manifest" href="/webmanifest?vers=<?php echo VERSION; ?>" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="rgb(239, 182, 91)" />
-    <link rel="icon" href="/asset/board-icon@180x.png?vers=<?php echo VERSION; ?>" />
-    <link rel="shortcut icon" href="/asset/board-icon@180x.png?vers=<?php echo VERSION; ?>" />
-    <link rel="apple-touch-icon" href="/asset/board-icon@180x.png?vers=<?php echo VERSION; ?>" sizes="180x180" />
+    <link rel="icon" href="/asset/board-icon@512x.png?vers=<?php echo VERSION; ?>" />
+    <link rel="shortcut icon" href="/asset/board-icon@512x.png?vers=<?php echo VERSION; ?>" />
     <script type="module" src="/js/app.js?vers=<?php echo VERSION; ?>" ></script>
     <script>
         let env = {
