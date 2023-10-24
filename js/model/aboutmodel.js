@@ -41,7 +41,7 @@ export default class AboutModel extends Model
             { name: 'device cookie', disclaimer: 'long-term cookie', text: 'random browser cookie saved to your device to help the server securely recognize you between visits' },
             { name: 'access logs', disclaimer: 'apache access logs', text: 'cribb.app retains 60 days of anonymous ip and browser information from visitors to help maintain service' },
             { header: 'retention' },
-            { name: 'forget identity', text: 'use the "forget identity..." link in the identity menu to logout and delete all cribb.app access cookies on your device' }
+            { name: 'forget identity', text: 'use the "forget identity..." link in the identity menu to logout and delete all cribb.app cookies on your device' }
         ];
     }
 
