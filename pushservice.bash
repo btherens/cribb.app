@@ -39,7 +39,7 @@ function openThread() {
 function closeThread() { if ! rmdir "$SERVICE.lock"; then >&2 echo "failed to release lock"; fi; }
 
 # run service in loop until timeout
-function runservice() { while [ $SECONDS -lt $TIMEOUT ]; do php "$SERVICE.php" 2>>"$SERVICE.err"; done; }
+function runService() { while [ $SECONDS -lt $TIMEOUT ]; do php "$SERVICE.php" 2>>"$SERVICE.err"; done; }
 
 # run service
 if openThread; then runService; closeThread; fi;
