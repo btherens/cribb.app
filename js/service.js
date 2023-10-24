@@ -10,12 +10,11 @@ const app_urls     = [
     /* basic application */
     /* html */
     '/',
-    /* stylesheets */
+    /* stylesheet */
     '/css/style.css',
     /* javascript */
     '/js/app.js',
     /* images */
-    '/asset/board-icon@180x.png',
     '/asset/board-icon@512x.png',
     '/asset/action-icon.svg',
     '/asset/delete.svg',
@@ -91,7 +90,6 @@ const showNotification = ( event ) =>
         const data    = event.data.json();
         const options = {
             body:     data.m,
-            //icon:     '/asset/board-icon@512x.png',
             tag:      data.u,
             renotify: true
         };
@@ -129,9 +127,9 @@ const clickNotification = ( event ) => {
 };
 
 /* process objects sent from app */
-const processMessage = ( event ) =>
+const routeMessage = ( event ) =>
 {
-    /* update message */
+    /* update badge */
     if ( event.data?.badge != null ) { return event.waitUntil( setAppBadge( event.data.badge ) ) }
 }
 
@@ -141,4 +139,4 @@ self.addEventListener( 'fetch', routeFetch );
 self.addEventListener( 'activate', activateService );
 self.addEventListener( 'push', showNotification );
 self.addEventListener( 'notificationclick', clickNotification );
-self.addEventListener( 'message', processMessage );
+self.addEventListener( 'message', routeMessage );
