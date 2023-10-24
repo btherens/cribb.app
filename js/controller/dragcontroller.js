@@ -15,7 +15,7 @@ export default class DragController extends Controller
     }
 
     /* initiate environment */
-    static init = () => _view.bindMoveMap( DragController._bindDragMouse );
+    static init = () => _view.bindMoveMap( DragController._bindDragPointer );
 
     /* draggable screen area */
     static set screen( el ) { _view.screen = el }
@@ -88,14 +88,11 @@ export default class DragController extends Controller
             /* set drag event (touch only, mouse events assigned to dragmap) */
             DragController._bindDragTouch( el );
         }
-        /* otherwise use mouse-style events */
-        else
-        {
-            el.onpointerdown = ev => ev.button === 0 && DragController._startDrag( ev );
-        }
+        /* apply pointer-style events */
+        el.onpointerdown = ev => ev.button === 0 && DragController._startDrag( ev );
         /* prevent clicks */
-        el.onclick = ev => { ev.preventDefault(); ev.stopPropagation(); }
-        /* mdrag visual styles */
+        el.onclick       = ev => { ev.preventDefault(); ev.stopPropagation(); }
+        /* drag visual styles */
         el.classList.add( _view.classCanDrag );
         /* return object reference */
         return el;
@@ -130,10 +127,8 @@ export default class DragController extends Controller
         el.onpointerdown = '';
     }
 
-    /* set mouse drag events - the dragmap by default
-     * 
-     */
-    static _bindDragMouse( el )
+    /* set pointer drag events - used on drag map */
+    static _bindDragPointer( el )
     {
         el.onpointermove = ev => DragController._runDrag( ev );
         el.onpointerup   = ev => DragController._endDrag( ev );
