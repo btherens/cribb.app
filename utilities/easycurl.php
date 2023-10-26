@@ -12,7 +12,7 @@ class easycurl {
     private   $requests  = [];
     /* base options that you want to be used with EVERY request */
     protected $options   = [
-        CURLOPT_SSL_VERIFYPEER => 0,
+        CURLOPT_SSL_VERIFYPEER => 1,
         CURLOPT_RETURNTRANSFER => 1,
         CURLOPT_CONNECTTIMEOUT => 30,
         CURLOPT_TIMEOUT        => 30
