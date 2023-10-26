@@ -88,8 +88,8 @@ export default class DragController extends Controller
             /* set drag event (touch only, mouse events assigned to dragmap) */
             DragController._bindDragTouch( el );
         }
-        /* apply pointer-style events */
-        el.onpointerdown = ev => ev.button === 0 && DragController._startDrag( ev );
+        /* support mouse style input devices */
+        el.onpointerdown = ev => 'mouse' == ev.pointerType && 0 === ev.button && DragController._startDrag( ev );
         /* prevent clicks */
         el.onclick       = ev => { ev.preventDefault(); ev.stopPropagation(); }
         /* drag visual styles */
