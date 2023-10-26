@@ -9,3 +9,5 @@
     shortID::setKey( SHORTID_SALT );
     /* minimum string length */
     shortID::setPadding( 4 );
+    /* set hostname for push */
+    encryption::setHostName( BASEDNS );

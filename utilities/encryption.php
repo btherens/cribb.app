@@ -121,8 +121,9 @@ class encryption
         return self::$_vapidPrivate;
     }
 
-    /* url to use in vapid headers */
-    private static string $_vapidHostname = BASEDNS;
+    /* vapid host name */
+    private static string $_vapidHostname;
+    public  static function setHostname( string $name ): void { self::$_vapidHostname = $name; }
 
     /* length to pad payload to */
     private static int $_padlength = 255;
