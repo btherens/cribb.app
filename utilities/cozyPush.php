@@ -1,8 +1,30 @@
 <?php
 
-/* web push encryption - message encryption and vapid header generation */
-class encryption
+/* web push encryption - encrypt messages and build request headers */
+class cozyPush
 {
+
+    /* vapid public key */
+    private static string $_vapidPublic;
+    public  static function vapidPublic(): string
+    {
+        /* load from file */
+        if ( !isset( self::$_vapidPublic ) ) { self::$_vapidPublic = rtrim( @file_get_contents( 'vapid.public.key' ) ); }
+        return self::$_vapidPublic;
+    }
+
+    /* vapid private key */
+    private   static string $_vapidPrivate;
+    protected static function vapidPrivate(): string
+    {
+        /* load from file */
+        if ( !isset( self::$_vapidPrivate ) ) { self::$_vapidPrivate = rtrim( @file_get_contents( 'vapid.private.key' ) ); }
+        return self::$_vapidPrivate;
+    }
+
+    /* vapid host name */
+    private static string $_vapidHostname;
+    public  static function setHostname( string $name ): void { self::$_vapidHostname = $name; }
 
     /* encrypt a payload with user key and token */
     public static function encrypt( string $payload, string $userPublicKey, string $userAuthToken, string $encoding = 'aesgcm' ): stdclass
@@ -102,28 +124,6 @@ class encryption
         /* build and return the token */
         return "$info_encoded.$data_encoded.$signature_encoded";
     }
-
-    /* vapid public key */
-    private static string $_vapidPublic;
-    public  static function vapidPublic(): string
-    {
-        /* load from file */
-        if ( !isset( self::$_vapidPublic ) ) { self::$_vapidPublic = rtrim( @file_get_contents( 'vapid.public.key' ) ); }
-        return self::$_vapidPublic;
-    }
-
-    /* vapid private key */
-    private   static string $_vapidPrivate;
-    protected static function vapidPrivate(): string
-    {
-        /* load from file */
-        if ( !isset( self::$_vapidPrivate ) ) { self::$_vapidPrivate = rtrim( @file_get_contents( 'vapid.private.key' ) ); }
-        return self::$_vapidPrivate;
-    }
-
-    /* vapid host name */
-    private static string $_vapidHostname;
-    public  static function setHostname( string $name ): void { self::$_vapidHostname = $name; }
 
     /* length to pad payload to */
     private static int $_padlength = 255;
@@ -314,4 +314,13 @@ class encryption
         while ( '00' === mb_substr( $data, 0, 2, '8bit' ) && '7f' < mb_substr( $data, 2, 2, '8bit' ) ) { $data = mb_substr( $data, 2, null, '8bit' ); }
         return $data;
     }
+}
+
+/* simple encode / decode */
+class Base64URL
+{
+    /* encode string in trimmed base64url */
+    public static function encode( string $string ): string { return rtrim( strtr( base64_encode( $string ), '+/', '-_' ), '=' ); }
+    /* decode a base64url-encoded string */
+    public static function decode( string $b64url ): string { return base64_decode( strtr( $b64url, '-_', '+/' ), true ); }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /* curl requests interface */
-class easycurl {
+class cozyCurl {
     /* batch size is the max number of simultaneous requests */
     private   $batchsize = 5;
     /* the timeout used for curl_multi_select */

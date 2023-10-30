@@ -20,7 +20,7 @@
             author: '<?php echo SOURCEAUTHOR; ?>',
             changelog: <?php echo CHANGELOG; ?>,
             version: '<?php echo VERSION; ?>',
-            vapidkey: '<?php echo encryption::vapidPublic(); ?>'
+            vapidkey: '<?php echo cozyPush::vapidPublic(); ?>'
         };
     </script>
     <style><?php

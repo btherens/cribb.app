@@ -1,6 +1,6 @@
 <?php
 
-class PushController extends Controller
+class _PushController extends Controller
 {
 
     /* constructor */
@@ -41,7 +41,7 @@ class PushController extends Controller
     public function runPushService( int $timeout = 60 ): void
     {
         /* begin timer */
-        $start   = microtime( true );
+        $start = microtime( true );
         /* run push service in 4 second batches */
         do { $this->_execPush(); } while ( sleep( 4 ) || microtime( true ) - $start < $timeout );
     }
@@ -50,21 +50,21 @@ class PushController extends Controller
     private function _execPush(): void
     {
         /* create curl object with callback for 410 status code */
-        $curl = new easycurl( function( $response, $info, $request ) { if ( 410 === $info[ 'http_code' ] ) { ( $request->callback )(); } } );
+        $curl = new cozyCurl( function( $response, $info, $request ) { if ( 410 === $info[ 'http_code' ] ) { ( $request->callback )(); } } );
         /* return list of notifications to send */
         $list = $this->_model->listPush();
         /* loop through pending notifications */
         while ( $notification = $list->fetch() )
         {
             /* create and encrypt a notification payload */
-            $message  = encryption::encrypt(
+            $message  = cozyPush::encrypt(
                 json_encode( $this->_buildTurnUpdatePayload( $notification->p2_name, $notification->game_id, $notification->badge ) ),
                 $notification->key,
                 $notification->token,
                 $notification->encoding
             );
             /* create headers */
-            $headers  = encryption::buildHeaders( $message->cipherText, $message->salt, $message->localPublicKey, $notification->endpoint, $notification->encoding );
+            $headers  = cozyPush::buildHeaders( $message->cipherText, $message->salt, $message->localPublicKey, $notification->endpoint, $notification->encoding );
             /* 410 status code callback */
             $callback = fn() => $this->_model->dropSubscription( $notification->id );
             /* add request to queue */
