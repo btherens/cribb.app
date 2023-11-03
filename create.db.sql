@@ -82,6 +82,7 @@ DROP TABLE IF EXISTS `game_result`;
 DROP TABLE IF EXISTS `game_activity`;
 DROP TABLE IF EXISTS `game`;
 
+DROP TABLE IF EXISTS `fidokey`;
 DROP TABLE IF EXISTS `pushsubscription`;
 DROP TABLE IF EXISTS `session`;
 DROP TABLE IF EXISTS `device`;
@@ -103,13 +104,21 @@ INSERT INTO `params` ( `key`, `value` ) VALUES ( 'pushtimestamp', '' );
 CREATE TABLE `identity` (
     `id`         int(11)      NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `id_ext`     binary(16)   NOT NULL,
-    `credId`     binary(20)   NULL,
-    `credKey`    varchar(255) NULL,
     `enabled`    tinyint(1)   NOT NULL DEFAULT 0,
     `timestamp`  timestamp    NOT NULL DEFAULT current_timestamp(),
     CONSTRAINT   `identityUC_idext` UNIQUE ( `id_ext` )
 );
 
+/* passkey storage */
+CREATE TABLE `fidokey` (
+    `id`          int(11)                NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    /* link login factor to an identity */
+    `identity_id` int(11)                NOT NULL,
+    `credId`      binary(20)             NOT NULL,
+    `credKey`     varchar(255)           NOT NULL,
+    `timestamp`   timestamp              NOT NULL DEFAULT current_timestamp(),
+    CONSTRAINT    `fidokeyFK_identityid` FOREIGN KEY ( `identity_id` ) REFERENCES `identity` ( `id` ) ON DELETE CASCADE
+);
 
 /* authenticated devices */
 CREATE TABLE `device`
