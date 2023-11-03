@@ -4,6 +4,7 @@ import IdentityModel from '../model/identitymodel.js';
 import IdentityView from '../view/identityview.js';
 
 import sfetch from '../sfetch.js';
+import { createAttestation, createAssertion } from '../webauthn.js';
 import AvatarController from './avatarcontroller.js';
 import ButtonController from './buttoncontroller.js';
 
@@ -19,7 +20,7 @@ export default class IdentityController extends Controller
         /* apply bindings */
         this.liveavatar.bindOnFormChanged( this.onFormChanged );
         this.view.bindUpdateLiveName( this.handleUpdateLiveName );
-        this.view.bindSubmitRestoreIdentity( this.handleSubmitRestoreIdentity );
+        this.view.bindSubmitRestoreIdentity( this.submitRestoreIdentity );
         this.view.bindSubmitForgetIdentity( this.handleSubmitForgetIdentity );
         this.model.bindOnModelChanged( this.onModelChanged );
 
@@ -79,30 +80,43 @@ export default class IdentityController extends Controller
         if ( form.checkValidity() ) { this.submitUpdateIdentity( name ) } else { return form.reportValidity() }
     }
 
-    submitCreateIdentity = ( name ) =>
-    {
-        /* get passkey create object from server */
-        sfetch.json( sfetch.request( '/identity/createAttestation', { name: name }, 'post' ) ).then( j => {
-            /* decode random bytes */
-            j.challenge = Uint8Array.from( atob( j.challenge ), c => c.charCodeAt( 0 ) ).buffer;
-            j.user.id   = Uint8Array.from( atob( j.user.id   ), c => c.charCodeAt( 0 ) ).buffer;
-            /* create credentials in client */
-            return navigator.credentials.create( { publicKey: j } );
-        } ).then( creds => {
-            /* b64 encode utf-8 bytes for transmission */
-            const [ b64AttestationObj, b64ClientDataJSON ] = [ creds.response.attestationObject, creds.response.clientDataJSON ].map( b => b ? btoa( [ ...new Uint8Array( b ) ].map( c => String.fromCharCode( c ) ).join( '' ) ) : null );
-            /* save keys to new identity */
-            return sfetch.json( sfetch.request( '/identity/attestIdentity', { attestationObject: b64AttestationObj, clientDataJSON: b64ClientDataJSON }, 'post' ) );
-        } ).then( j => {
-            if ( j.success )
+    /* create identity on server and save to device */
+    submitCreateIdentity = ( name ) => sfetch.json( sfetch.request( '/identity/createAttestationChallenge', { name: name }, 'post' ) )
+        /* create attestation on device */
+        .then( createAttestation )
+        /* submit attestation object to server */
+        .then( att => sfetch.json( sfetch.request( '/identity/attestIdentity', att, 'post' ) ) )
+        .then( response =>
+        {
+            if ( response.success )
             {
                 /* save avatar config */
                 this.liveavatar.saveLiveAvatar();
                 /* finish */
-                return this._loginAndClose( j.name );
+                return this._loginAndClose( response.name );
             }
-        } ).catch( e => { console.log( e ); alert( 'failed to create passkey!\n\nyou will need a signed passkey to play' ); location.reload(); } )
-    }
+        } )
+        .catch( e => { console.log( e ); alert( 'failed to create passkey!\n\nyou will need a signed passkey to play' ); location.reload(); } )
+
+    /* attempt to restore identity using a passkey */
+    submitRestoreIdentity = ( ) => sfetch.json( sfetch.request( '/identity/createAssertion', null, 'get' ) )
+        /* create assertion */
+        .then( createAssertion )
+        /* submit attestation object to server */
+        .then( assertion => sfetch.json( sfetch.request( '/identity/assertIdentity', assertion, 'post' ) ) )
+        .then( response  =>
+        {
+            /* check response object for success of identity restore */
+            if ( response.success )
+            {
+                /* get the identity's avatar config */
+                this.liveavatar.fetchAvatar();
+                /* finish login */
+                return this._loginAndClose( response.name );
+            }
+            else { console.log( 'restore identity failed: ' + response.message ) }
+        } )
+        .catch( e => { console.log( e ); location.reload(); } )
 
     /* save identity name to local model, reconnect to sync service, dismiss an open identity screen, and route to next place in application */
     _loginAndClose( n )
@@ -117,53 +131,6 @@ export default class IdentityController extends Controller
         this.handlePopMenu();
         /* reroute app now that we're in a new location */
         this.handleRoute();
-    }
-
-    /* attempt to restore identity using a passkey */
-    handleSubmitRestoreIdentity = ( ) =>
-    {
-        /* get passkey create object from server */
-        sfetch.json( sfetch.request( '/identity/createAssertion', null, 'get' ) ).then( j => {
-            /* decode random bytes */
-            j.challenge = Uint8Array.from( atob( j.challenge ), c => c.charCodeAt( 0 ) ).buffer;
-            /* create credentials in client */
-            return navigator.credentials.get( { publicKey: j } );
-        } ).then( creds => {
-            /* encode objects for transmission */
-            const [
-                b64RawId,
-                b64ClientDataJSON,
-                b64AuthenticatorData,
-                b64Signature,
-                b64UserHandle
-            ] = [
-                creds.rawId,
-                creds.response.clientDataJSON,
-                creds.response.authenticatorData,
-                creds.response.signature,
-                creds.response.userHandle
-            /* pass each value through b64 encoding */
-            ].map( b => b ? btoa( [ ...new Uint8Array( b ) ].map( c => String.fromCharCode( c ) ).join( '' ) ) : null );
-            /* send signed objects to server for validation */
-            return sfetch.json( sfetch.request( '/identity/assertIdentity', {
-                rawId: b64RawId,
-                clientDataJSON: b64ClientDataJSON,
-                authenticatorData: b64AuthenticatorData,
-                signature: b64Signature,
-                userHandle: b64UserHandle
-            }, 'post' ) );
-        } ).then( j => {
-            /* check response object for success of identity restore */
-            if ( j.success )
-            {
-                /* get the identity's avatar config */
-                this.liveavatar.fetchAvatar();
-                /* finish login */
-                return this._loginAndClose( j.name );
-            }
-            else { console.log( 'restore identity failed: ' + j.message ) }
-        /* print error to console and reload */
-        } ).catch( e => { console.log( e ); location.reload(); } )
     }
 
     /* update an identity on server */

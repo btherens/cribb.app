@@ -121,7 +121,7 @@ class IdentityController extends Controller
     }
 
     /* create an identity record and return a webauthn attestationoptions object to sign */
-    public function createAttestation( $cmd ): void
+    public function createAttestationChallenge( $cmd ): void
     {
         /* filter inputs */
         $input = filter_var_array( $cmd, [
@@ -242,7 +242,6 @@ class IdentityController extends Controller
                         /* register device and session */
                         $this->_model->createDevice( );
                         $this->_model->createSession( );
-    
                         /* return response */
                         $response = [ 'name' => $this->_model->getName(), 'success' => true ];
                     }
