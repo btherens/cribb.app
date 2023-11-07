@@ -611,7 +611,7 @@ BEGIN
     /* return list of push notifications with subscription info */
     WITH
         badges AS (
-            SELECT `p1_id`, SUM( `isturn` ) AS `badge` FROM `vgamedetail` GROUP BY `p1_id`
+            SELECT `p1_id`, SUM( `isturn` ) AS `badge` FROM `vgamedetail` WHERE 0 < `round` GROUP BY `p1_id`
         ),
         updates AS (
             SELECT `game_id`, `p1_id`, `p2_name`, `timestamp`
