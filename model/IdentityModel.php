@@ -151,32 +151,37 @@ class IdentityModel extends Model
         $id = &$this->identity->id;
         if ( $id )
         {
-            /* save credId, key to model, and enable identity:
-             * if no values have been set
-             * identity has not been
-             * if identity record is < 30 seconds old
+            /* save credId, key to model:
+             * if no key has been set
+             * if identity record is < 60 seconds old
              */
-            $sql = $this->run(
-                'UPDATE `identity`
-                SET `credId` = ?, `credKey` = ?, `enabled` = 1
-                WHERE `id` = ? AND `enabled` = 0 AND coalesce( `credId`, `credKey` ) IS NULL AND `timestamp` > NOW() - INTERVAL 60 SECOND',
+            $this->run(
+                'INSERT INTO `fidokey` ( `identity_id`, `credId`, `credKey` )
+                SELECT       i.`id`, ?, ?
+                FROM         `identity` i
+                LEFT JOIN    `fidokey`  fk on i.`id` = fk.`identity_id` 
+                WHERE        ? = i.`id` AND fk.`id` IS NULL AND i.`timestamp` > NOW() - INTERVAL 60 SECOND',
                 [ $credId, $key, $id ]
+            );
+            /* fully enable identity */
+            $this->run(
+                'UPDATE `identity` i
+                JOIN    `fidokey` fk ON i.`id` = fk.`identity_id` 
+                SET     i.`enabled` = 1, i.`timestamp` = CURRENT_TIMESTAMP
+                WHERE   fk.`id` = LAST_INSERT_ID()'
             );
         }
     }
 
-    /* return a valid public key and remember set identity to property */
+    /* return a valid public key and set identity to property */
     public function getCredentialKey( string $credId ): ?string
     {
-        $result   = false;
-        $identity = $this->run(
-            'SELECT * FROM `identity` WHERE `credId` = ? AND ( `enabled` = 1 OR `timestamp` > NOW() - INTERVAL 60 SECOND )',
-            [ $credId ]
-        )->fetch();
-        if ( $identity )
+        $result = false;
+        $cred   = $this->run( 'SELECT `identity_id`, `credKey` FROM `fidokey` WHERE `credId` = ?', [ $credId ] )->fetch();
+        if ( $cred )
         {
-            $this->identity = $identity;
-            $result = $this->identity->credKey;
+            $this->_loadIdentity( $cred->identity_id );
+            $result = $cred->credKey;
         }
         return $result;
     }
