@@ -101,7 +101,6 @@ export default class DragController extends Controller
     /* bind a simple select target without full drag */
     static bindInactive = ( el ) =>
     {
-        /* mdrag visual styles */
         el.classList.add( _view.classCanDrag );
         el.onpointerdown = DragController._toggleElement;
         return el;

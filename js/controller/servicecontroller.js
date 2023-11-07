@@ -43,7 +43,7 @@ export default class ServiceController extends Controller
         /* save the subscription to service */
         .then( sub => sub && this._pnSetSubscription( sub ) );
 
-    /* resolves when permission permission is granted */
+    /* resolves when permission is granted */
     _pnCheckPermission = () => new Promise( resolve =>
     {
         /* exit now if push is not possible in this environment */

@@ -102,11 +102,11 @@ INSERT INTO `params` ( `key`, `value` ) VALUES ( 'pushtimestamp', '' );
 
 /* user identities */
 CREATE TABLE `identity` (
-    `id`         int(11)      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `id_ext`     binary(16)   NOT NULL,
-    `enabled`    tinyint(1)   NOT NULL DEFAULT 0,
-    `timestamp`  timestamp    NOT NULL DEFAULT current_timestamp(),
-    CONSTRAINT   `identityUC_idext` UNIQUE ( `id_ext` )
+    `id`        int(11)            NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `id_ext`    binary(16)         NOT NULL,
+    `enabled`   tinyint(1)         NOT NULL DEFAULT 0,
+    `timestamp` timestamp          NOT NULL DEFAULT current_timestamp(),
+    CONSTRAINT  `identityUC_idext` UNIQUE ( `id_ext` )
 );
 
 /* passkey storage */
@@ -123,14 +123,13 @@ CREATE TABLE `fidokey` (
 );
 
 /* authenticated devices */
-CREATE TABLE `device`
-(
-    `id`             int(11)      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `identity_id`    int(11)      NOT NULL,
-    `selector`       varchar(255) NOT NULL,
-    `validator_hash` varchar(255) NOT NULL,
-    `expiry`         datetime     NOT NULL,
-    `timestamp`      timestamp    NOT NULL DEFAULT current_timestamp(),
+CREATE TABLE `device` (
+    `id`             int(11)               NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `identity_id`    int(11)               NOT NULL,
+    `selector`       varchar(255)          NOT NULL,
+    `validator_hash` varchar(255)          NOT NULL,
+    `expiry`         datetime              NOT NULL,
+    `timestamp`      timestamp             NOT NULL DEFAULT current_timestamp(),
     CONSTRAINT       `deviceFK_identityid` FOREIGN KEY ( `identity_id` ) REFERENCES `identity` ( `id` ) ON DELETE CASCADE,
     CONSTRAINT       `deviceUC_selector`   UNIQUE      ( `selector` )
 );
@@ -145,7 +144,6 @@ CREATE TABLE `session` (
     UNIQUE KEY   `session_id` ( `session_id` ),
     CONSTRAINT   `sessionFK_deviceid` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE
 );
-
 
 /* store avatar data here */
 CREATE TABLE `avatar` (
