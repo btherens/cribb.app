@@ -117,7 +117,9 @@ CREATE TABLE `fidokey` (
     `credId`      binary(20)             NOT NULL,
     `credKey`     varchar(255)           NOT NULL,
     `timestamp`   timestamp              NOT NULL DEFAULT current_timestamp(),
-    CONSTRAINT    `fidokeyFK_identityid` FOREIGN KEY ( `identity_id` ) REFERENCES `identity` ( `id` ) ON DELETE CASCADE
+    CONSTRAINT    `fidokeyFK_identityid` FOREIGN KEY ( `identity_id` ) REFERENCES `identity` ( `id` ) ON DELETE CASCADE,
+    CONSTRAINT    `fidokeyUC_credId`     UNIQUE      ( `credId` ),
+    CONSTRAINT    `fidokeyUC_identityid` UNIQUE      ( `identity_id` )
 );
 
 /* authenticated devices */
