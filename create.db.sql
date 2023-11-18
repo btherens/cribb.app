@@ -388,9 +388,9 @@ CREATE VIEW `vgamedetail` AS
             gl.`identity_id`,
             gl.`r` AS `p_index`,
             /* score cannot exceed 121 */
-            CAST( least( 121, sc.`sum` ) AS int ) AS `score`,
+            CAST( least( 121, sc.`sum` ) AS unsigned ) AS `score`,
             /* last points limited by max score */
-            CAST( s.`value` + least( 0, 121 - sc.`sum` ) AS int ) AS `points`
+            CAST( s.`value` + least( 0, 121 - sc.`sum` ) AS unsigned ) AS `points`
         FROM gamelink gl
         LEFT JOIN scores sc ON sc.`game_id` = gl.`game_id` AND gl.`identity_id` = sc.`identity_id`
         LEFT JOIN score  s  ON  s.`game_id` = gl.`game_id` AND gl.`identity_id` = s.`identity_id`
