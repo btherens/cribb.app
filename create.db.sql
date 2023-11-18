@@ -279,31 +279,31 @@ CREATE VIEW `vgame_activity_round_latest` AS
 /* # of records of each type */
 CREATE VIEW `vgame_activity_count` AS
     SELECT
-        ga.*,
+        `game_id`, `identity_id`, `type`,
         COUNT( * ) as `count`
-    FROM `game_activity` ga
+    FROM `game_activity`
     GROUP BY `game_id`, `identity_id`, `type`;
 
 CREATE VIEW `vgame_activity_round_count` AS
     SELECT
-        ga.*,
+        `game_id`, `identity_id`, `round`, `type`,
         COUNT( * ) as `count`
-    FROM `game_activity` ga
+    FROM `game_activity`
     GROUP BY `game_id`, `identity_id`, `round`, `type`;
 
 /* the sum of each type */
 CREATE VIEW `vgame_activity_sum` AS
     SELECT
-        ga.*,
+        `game_id`, `identity_id`, `type`,
         SUM( `value` ) as `sum`
-    FROM `game_activity` ga
+    FROM `game_activity`
     GROUP BY `game_id`, `identity_id`, `type`;
 
 CREATE VIEW `vgame_activity_round_sum` AS
     SELECT
-        ga.*,
+        `game_id`, `identity_id`, `round`, `type`,
         SUM( `value` ) as `sum`
-    FROM `game_activity` ga
+    FROM `game_activity`
     GROUP BY `game_id`, `identity_id`, `round`, `type`;
 
 /* return records that are more recent than other player's most recent record */
