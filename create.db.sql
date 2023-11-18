@@ -242,39 +242,39 @@ ON `game_activity` FOR EACH ROW
 
 /* returns the current avatar for an identity */
 CREATE VIEW `vavatar` AS
-    WITH rank AS (
+    WITH pcte AS (
         SELECT a.*, ROW_NUMBER() OVER ( PARTITION BY `identity_id` ORDER BY `timestamp` DESC, `id` DESC  ) AS `r`
         FROM `avatar` a
     )
-    SELECT * FROM rank WHERE `r` = 1;
+    SELECT * FROM pcte WHERE `r` = 1;
 
 /* returns the current name for an identity */
 CREATE VIEW `vname` AS
-    WITH rank AS (
+    WITH pcte AS (
         SELECT n.*, ROW_NUMBER() OVER ( PARTITION BY `identity_id` ORDER BY `timestamp` DESC, `id` DESC  ) AS `r`
         FROM `name` n
     )
-    SELECT * FROM rank WHERE `r` = 1;
+    SELECT * FROM pcte WHERE `r` = 1;
 
 /* latest records of each type */
 CREATE VIEW `vgame_activity_latest` AS
-    WITH ranked AS (
+    WITH pcte AS (
         SELECT
             ga.*,
             ROW_NUMBER() OVER ( PARTITION BY `game_id`, `identity_id`, `type` ORDER BY `timestamp` DESC, `id` DESC ) AS rn
         FROM `game_activity` ga
     )
-    SELECT * FROM ranked WHERE rn = 1;
+    SELECT * FROM pcte WHERE rn = 1;
 
 /* latest records of each type in each round */
 CREATE VIEW `vgame_activity_round_latest` AS
-    WITH ranked AS (
+    WITH pcte AS (
         SELECT
             ga.*,
             ROW_NUMBER() OVER ( PARTITION BY `game_id`, `identity_id`, `round`, `type` ORDER BY `timestamp` DESC, `id` DESC ) AS rn
         FROM `game_activity` ga
     )
-    SELECT * FROM ranked WHERE rn = 1;
+    SELECT * FROM pcte WHERE rn = 1;
 
 /* # of records of each type */
 CREATE VIEW `vgame_activity_count` AS
@@ -529,13 +529,13 @@ CREATE VIEW `vtimestamp` AS
 
 /* a view of session that trims all but most recent session for a given device */
 CREATE VIEW `vsession` AS
-    WITH ranked AS (
+    WITH pcte AS (
         SELECT
             s.*,
             ROW_NUMBER() OVER ( PARTITION BY `device_id` ORDER BY `timestamp` DESC, `id` DESC ) AS rn
         FROM `session` s
     )
-    SELECT * FROM ranked WHERE rn = 1;
+    SELECT * FROM pcte WHERE rn = 1;
 
 /* ordered view of push subscriptions */
 CREATE VIEW `vpushsubscription` AS
