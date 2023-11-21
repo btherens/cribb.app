@@ -1,41 +1,10 @@
 <?php
 
-class _PushController extends Controller
+class _PushController extends PushController
 {
 
     /* constructor */
-    public function __construct( $action )
-    {
-        $model = 'Push';
-        /* only run push service from cli */
-        if ( 'runpushservice' == strtolower( $action ?? '' ) && 'cli' !== php_sapi_name() ) { throw new Exception( 'forbidden method' ); }
-        parent::__construct( $model, $action );
-        $this->_setModel( $model );
-    }
-
-    /* save a push subscription to model */
-    public function setSubscription( $cmd ): void
-    {
-        $response = false;
-        if
-        (
-            /* return a valid deviceid */
-            ( $id       = auth::deviceid() ) &&
-            /* endpoint url */
-            ( $endpoint = filter_var( $cmd[ 'u' ], FILTER_VALIDATE_URL ) ) &&
-            /* client's public key and authtoken for content encryption */
-            ( $key      = base64_decode( $cmd[ 'k' ] ) ) &&
-            ( $token    = base64_decode( $cmd[ 't' ] ) )
-        )
-        {
-            /* save to model */
-            $this->_model->setSubscription( $id, $endpoint, $key, $token );
-            /* confirm result */
-            $response = true;
-        }
-        header( 'Content-type: application/json; charset=utf-8' );
-        echo json_encode( $response );
-    }
+    public function __construct() { parent::__construct( null ); }
 
     /* run push service until timeout in seconds */
     public function runPushService( int $timeout = 60 ): void
