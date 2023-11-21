@@ -23,21 +23,14 @@ class _PushController extends PushController
         /* return list of notifications to send */
         $list = $this->_model->listPush();
         /* loop through pending notifications */
-        while ( $notification = $list->fetch() )
+        while ( $update = $list->fetch() )
         {
-            /* create and encrypt a notification payload */
-            $message  = cozyPush::encrypt(
-                json_encode( $this->_buildTurnUpdatePayload( $notification->p2_name, $notification->game_id, $notification->badge ) ),
-                $notification->key,
-                $notification->token,
-                $notification->encoding
-            );
-            /* create headers */
-            $headers  = cozyPush::buildHeaders( $message->cipherText, $message->salt, $message->localPublicKey, $notification->endpoint, $notification->encoding );
             /* 410 status code callback */
-            $callback = fn() => $this->_model->dropSubscription( $notification->id );
+            $callback = fn() => $this->_model->dropSubscription( $update->id );
+            /* create a new push message object */
+            $message  = $this->_createPushObj( $update );
             /* add request to queue */
-            $curl->request( $notification->endpoint, 'POST', $message->cipherText, $headers, null, $callback );
+            $curl->request( $update->endpoint, 'POST', $message->cipherText(), $message->headers(), null, $callback );
         }
         /* be sure to close cursor to avoid issues */
         $list->closeCursor();
@@ -45,6 +38,24 @@ class _PushController extends PushController
         $curl->execute();
         /* delete any revoked subscriptions */
         $this->_model->flushDroppedSubscriptions();
+    }
+
+    private function _createPushObj( $update, string $basedns = 'cribb.app' /*BASEDNS*/ ): cozyPush
+    {
+        return new cozyPush(
+            /* encrypt this object for client */
+            json_encode( $this->_buildTurnUpdatePayload(
+                $update->p2_name,
+                $update->game_id,
+                $update->badge
+            ) ),
+            $basedns,
+            /* properties needed to encrypt payload and build headers */
+            $update->endpoint,
+            $update->key,
+            $update->token,
+            $update->encoding
+        );
     }
 
     /* return a turn update notification for frontend */
