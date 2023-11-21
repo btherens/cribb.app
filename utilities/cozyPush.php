@@ -1,30 +1,23 @@
 <?php
 
-/* web push encryption - encrypt messages and build request headers */
+/*
+ * web push encryption - encrypt messages with request headers
+ * $push    = New cozyPush( $payload, $hostname, $endpoint, $userPublicKey, $userAuthToken, $encoding );
+ * $content = $push->cipherText();
+ * $headers = $push->headers();
+ */
 class cozyPush
 {
-
-    /* vapid public key */
-    private static string $_vapidPublic;
-    public  static function vapidPublic(): string
+    protected stdclass $_encrypted;
+    protected array    $_headers;
+    public function __construct( string $payload, string $hostname, string $endpoint, string $userPublicKey, string $userAuthToken, string $encoding = 'aesgcm' )
     {
-        /* load from file */
-        if ( !isset( self::$_vapidPublic ) ) { self::$_vapidPublic = rtrim( @file_get_contents( 'vapid.public.key' ) ); }
-        return self::$_vapidPublic;
+        $this->_encrypted = self::encrypt( $payload, $userPublicKey, $userAuthToken, $encoding );
+        $this->_headers   = self::buildHeaders( $this->_encrypted->cipherText, $this->_encrypted->salt, $this->_encrypted->localPublicKey, $hostname, $endpoint, $encoding );
     }
-
-    /* vapid private key */
-    private   static string $_vapidPrivate;
-    protected static function vapidPrivate(): string
-    {
-        /* load from file */
-        if ( !isset( self::$_vapidPrivate ) ) { self::$_vapidPrivate = rtrim( @file_get_contents( 'vapid.private.key' ) ); }
-        return self::$_vapidPrivate;
-    }
-
-    /* vapid host name */
-    private static string $_vapidHostname;
-    public  static function setHostname( string $name ): void { self::$_vapidHostname = $name; }
+    /* object properties */
+    public function cipherText(): string { return $this->_encrypted->cipherText; }
+    public function headers():    array  { return $this->_headers; }
 
     /* encrypt a payload with user key and token */
     public static function encrypt( string $payload, string $userPublicKey, string $userAuthToken, string $encoding = 'aesgcm' ): stdclass
@@ -70,7 +63,7 @@ class cozyPush
     }
 
     /* build headers for a push request */
-    public static function buildHeaders( string $content, string $salt, string $localPublicKey, string $endpoint, string $encoding ): array
+    public static function buildHeaders( string $content, string $salt, string $localPublicKey, string $hostname, string $endpoint, string $encoding ): array
     {
         /* basic headers */
         $headers = [
@@ -80,7 +73,7 @@ class cozyPush
             'Content-Length'   => (string) mb_strlen( $content, '8bit' )
         ];
         /* create jwt using server-side vapid keys */
-        $jwt = self::buildJWT( $endpoint );
+        $jwt = self::buildJWT( $hostname, $endpoint );
         /* unique encoding headers */
         if ( 'aesgcm' === $encoding )
         {
@@ -97,8 +90,26 @@ class cozyPush
         return $headers;
     }
 
+    /* vapid public key */
+    private static string $_vapidPublic;
+    public  static function vapidPublic(): string
+    {
+        /* load from file */
+        if ( !isset( self::$_vapidPublic ) ) { self::$_vapidPublic = rtrim( @file_get_contents( 'vapid.public.key' ) ); }
+        return self::$_vapidPublic;
+    }
+
+    /* vapid private key */
+    private   static string $_vapidPrivate;
+    protected static function vapidPrivate(): string
+    {
+        /* load from file */
+        if ( !isset( self::$_vapidPrivate ) ) { self::$_vapidPrivate = rtrim( @file_get_contents( 'vapid.private.key' ) ); }
+        return self::$_vapidPrivate;
+    }
+
     /* create a new JWT */
-    public static function buildJWT( string $endpoint ): string
+    public static function buildJWT( string $hostname, string $endpoint ): string
     {
         /* vapid keys */
         $publickey    = Base64URL::decode( self::vapidPublic() );
@@ -113,7 +124,7 @@ class cozyPush
             /* 12 hours */
             'exp' => time() + 43200,
             /* subscription info */
-            'sub' => 'https://' . self::$_vapidHostname
+            'sub' => 'https://' . $hostname
         ];
         $data_encoded = Base64URL::encode( json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK ) );
         /* build signature */
