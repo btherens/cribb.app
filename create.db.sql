@@ -98,7 +98,7 @@ CREATE TABLE `params` (
     CONSTRAINT   `paramsUC_key` UNIQUE ( `key` )
 );
 /* populate params */
-INSERT INTO `params` ( `key`, `value` ) VALUES ( 'pushtimestamp', '' );
+INSERT INTO `params` ( `key`, `value` ) SELECT 'pushtimestamp', '';
 
 /* user identities */
 CREATE TABLE `identity` (
@@ -629,9 +629,9 @@ DELIMITER ;
 
 /* blocked words in user strings */
 CREATE TABLE `blockwords` (
-    `id`          int(11)      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `word`        varchar(50)  NOT NULL
+    `id`          int(11)     NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `word`        varchar(50) NOT NULL
 );
 
 /* supply a word list to block */
--- INSERT INTO `blockwords` ( `word` ) VALUES ( 'badword1' ), ...;
+-- INSERT INTO `blockwords` ( `word` ) SELECT 'badword1' UNION ALL ...;
