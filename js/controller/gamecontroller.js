@@ -981,7 +981,7 @@ export default class GameController extends Controller
         /* set prompt */
         this.view.prompt = ( p1score?.s ?? 0 ) > ( p2score?.s ?? 0 )
             ? 'declare win!'
-            : 'accept ' + ( 90 > ( p1score?.s ?? 0 ) ? '🦨' : 'loss' );
+            : 'accept ' + ( '🦨'.repeat( Math.floor( ( 119 - ( p1score?.s ?? 0 ) ) / 30 ) ) || 'loss' )
         this.view.button.disabled = false;
     }
 
