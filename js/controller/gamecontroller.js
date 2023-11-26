@@ -979,9 +979,9 @@ export default class GameController extends Controller
         DragController.dragQuota  = 0;
 
         /* set prompt */
-        this.view.prompt = ( p1score?.s ?? 0 ) > ( p2score?.s ?? 0 )
+        this.view.prompt = parseInt( p1score?.s ?? 0 ) > parseInt( p2score?.s ?? 0 )
             ? 'declare win!'
-            : 'accept ' + ( '🦨'.repeat( Math.floor( ( 119 - ( p1score?.s ?? 0 ) ) / 30 ) ) || 'loss' )
+            : 'accept ' + ( '🦨'.repeat( Math.floor( ( 119 - parseInt( p1score?.s ?? 0 ) ) / 30 ) ) || 'loss' )
         this.view.button.disabled = false;
     }
 
