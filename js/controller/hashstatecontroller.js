@@ -13,7 +13,7 @@ export default class HashStateController extends Controller
     }
 
     /* convert string to binary data */
-    toBinary( string )
+    static toBinary( string )
     {
         /* define binary object here */
         const codeUnits = new Uint16Array( string.length );
@@ -24,7 +24,7 @@ export default class HashStateController extends Controller
     }
 
     /* get string from binary */
-    fromBinary( data )
+    static fromBinary( data )
     {
         /* decode to ascii */
         const decode = atob( data );
@@ -40,7 +40,7 @@ export default class HashStateController extends Controller
     static _stateBuffer = {}
 
     /* load state object from url fragment into buffer */
-    _refreshBuffer = () => { try { HashStateController._stateBuffer = JSON.parse( this.fromBinary( window.location.hash.substring( 1 ) ) ) } catch( err ) { this.onStateChanged( null ) } }
+    _refreshBuffer = () => { try { HashStateController._stateBuffer = JSON.parse( HashStateController.fromBinary( window.location.hash.substring( 1 ) ) ) } catch( err ) { this.onStateChanged( null ) } }
 
     /* get state object for this object's key */
     get state()
@@ -66,5 +66,5 @@ export default class HashStateController extends Controller
     }
 
     /* bind state change function through debounce to limit writes to hash state */
-    bindOnStateChanged( ) { this.onStateChanged = this._debounce( ( buffer = HashStateController._stateBuffer ) => history.replaceState( '', document.title, !buffer || Object.keys( buffer ).length === 0 ? window.location.pathname : '#' + this.toBinary( JSON.stringify( buffer ) ) ), 500 ) }
+    bindOnStateChanged( ) { this.onStateChanged = this._debounce( ( buffer = HashStateController._stateBuffer ) => history.replaceState( '', document.title, !buffer || Object.keys( buffer ).length === 0 ? window.location.pathname : '#' + HashStateController.toBinary( JSON.stringify( buffer ) ) ), 500 ) }
 }
