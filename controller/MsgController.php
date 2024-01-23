@@ -64,7 +64,7 @@ class MsgController extends Controller
                 /* send message if timestamp is new */
                 if ( $timestamp != $new ) { $timestamp = $new; $this->_sendMsg( $timestamp ); }
                 /* limit loop speed */
-                sleep( 4 );
+                sleep( 2 );
             }
         }
         /* reject connection */
