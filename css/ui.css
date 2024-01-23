@@ -89,7 +89,7 @@ canvas {
 .tactile, .tactile:not( :has( input:disabled ) ):not( :has( .notebox ) ) * {
     cursor: pointer;
 }
-.tactile:disabled, .tactile:has( input:disabled ), .tactile input:disabled, .tactile.header {
+.tactile:disabled, .tactile:has( *:disabled ), .tactile *:disabled, .tactile.header {
     cursor: default;
 }
 /* add a margin to top of tactile ui */
