@@ -195,7 +195,7 @@ class IdentityModel extends Model
         /* 10 years */
         $expiry   = time() + ( 10 * 365 * 24 * 60 * 60 );
         /* set device cookie */
-        setcookie( 'devicetoken', $select . ':' . $validate, $expiry, '/' );
+        setcookie( 'devicetoken', $select . ':' . $validate, [ 'expires' => $expiry, 'path' => '/', 'httponly' => true ] );
         /* return selector and hashed validator */
         return [ $select, password_hash( $validate, PASSWORD_DEFAULT ), $expiry ];
     }
