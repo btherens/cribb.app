@@ -590,7 +590,7 @@ BEGIN
     SELECT  `timestamp` INTO oldtimestamp FROM `params` WHERE `key` = 'pushtimestamp';
     /* set new timestamp to model */
     UPDATE  `params`    SET  `timestamp` = newtimestamp WHERE `key` = 'pushtimestamp';
-    /* return previous timestamp up to a maximum of 10 minutes */
+    /* return previous timestamp */
     RETURN oldtimestamp;
 END$$
 
@@ -605,7 +605,7 @@ BEGIN
     /* defaults */
     /* newtimestamp: now */
     SET newtimestamp = IFNULL( newtimestamp, now() );
-    /* oldtimestamp: last run from model */
+    /* oldtimestamp: last run from model up to a max of 10 minutes ago */
     SET oldtimestamp = IFNULL( oldtimestamp, GREATEST( `setPushTimestamp`( newtimestamp ), newtimestamp - INTERVAL 10 MINUTE ) );
 
     /* return list of push notifications with subscription info */
@@ -618,7 +618,7 @@ BEGIN
             FROM   `vgamedetail`
             WHERE  1 = `isnew` AND 1 = `isturn` AND `timestamp` BETWEEN oldtimestamp AND newtimestamp
         )
-    SELECT u.*, p.`id`, p.`endpoint`, p.`key`, p.`token`, b.`badge`, 'aesgcm' AS `encoding`
+    SELECT u.*, p.`id`, p.`endpoint`, p.`key`, p.`token`, b.`badge`, 'aes128gcm' AS `encoding`
     FROM   updates u
     JOIN   `vpushsubscription` p ON p.`identity_id` = u.`p1_id`
     JOIN   badges b ON b.`p1_id` = u.`p1_id`

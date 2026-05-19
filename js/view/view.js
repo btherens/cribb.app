@@ -13,9 +13,9 @@ export default class View
     {
         /* create element */
         let el = document.createElement( tagName );
-        /* check for any explicit properties */
+        /* bind properties */
         if ( props ) { View._assignEventAttr( el, props ) }
-        /* evaluate and return nested objects */
+        /* apply any nested objects */
         return View._nest( el, nest )
     }
 

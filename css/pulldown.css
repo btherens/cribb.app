@@ -313,7 +313,7 @@ div.scroll::before {
     pointer-events: none;
     transition: box-shadow 0.4s ease;
 }
-/* show shadow at top of scroll */
+/* hide scroll shadows */
 div.scroll.noshadow::before {
     opacity: 0;
 }

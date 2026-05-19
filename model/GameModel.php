@@ -445,12 +445,14 @@ class GameModel extends Model
     /* get this round's play order
      * return array is in this format:
      * [
-     *     [ ...player cards thrown ],
-     *     [ ...opponent cards thrown ],
-     *     [ ...allcards in order ],
-     *     [ ...allcards discard ],
-     *     true / false if its player's turn
-     *     true / false if other player said go
+     *     [
+     *         [ ...player cards thrown ],
+     *         player go count
+     *     ],
+     *     [
+     *         [ ...opponent cards thrown ],
+     *         opponent go count
+     *     ]
      * ]
      */
     public function getPlay(): ?array
@@ -551,13 +553,17 @@ class GameModel extends Model
      * S: game settings value - 0-3
      * Z: a link to the next game in series
      * I: ignore this game in lists if I key is most recent record player made
+     * K: notify opponent
+         * 0 - your turn!
+         * n - that it is their turn
+         * 2 - game has ended
 
      * basic game moves
      * R: initiate a new round - value defines whose crib it is
      * Q: confirm after some points in play
-         * Q1 - continue after play round
-         * Q2 - continue after player 1 count
-         * Q3 - continue after player 2 count
+         * 1 - continue after play round
+         * 2 - continue after player 1 count
+         * 3 - continue after player 2 count
      * M: id of a findScore
      * N: empty record - used to set isturn flag
          * 0 - set isturn flag for no players
