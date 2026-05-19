@@ -949,8 +949,6 @@ class GameController extends Controller
     /* perform server-side game moves */
     protected function _play( $stage = null, $time = null, $values = null ): void
     {
-        /* null response if nothing needs to be said */
-        //$o = null;
         $g = $this->_model->game;
 
         /* continue if game is not over */

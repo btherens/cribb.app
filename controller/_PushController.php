@@ -40,7 +40,7 @@ class _PushController extends PushController
         $this->_model->flushDroppedSubscriptions();
     }
 
-    private function _createPushObj( $update, string $basedns = 'cribb.app' /*BASEDNS*/ ): cozyPush
+    private function _createPushObj( $update, string $basedns = BASEDNS ): cozyPush
     {
         return new cozyPush(
             /* encrypt this object for client */
