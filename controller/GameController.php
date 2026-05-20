@@ -113,20 +113,23 @@ class GameController extends Controller
                 /* loop through result set */
                 while( $g = $q->fetch( PDO::FETCH_ASSOC ) )
                 {
-                    array_push( $list, [
-                        'gid' => shortID::toShort( $g[ 'game_id' ] ),
-                        'p'   => $g[ 'p_index' ],
-                        'se'  => $this->_deserializeLobbySetting( $g[ 'setting' ], $g[ 'p_index' ] == 1 ),
-                        'r'   => $g[ 'round' ] > -1,
-                        'it'  => !!$g[ 'isturn' ] || ( $g[ 'p2_name' ] && -1 == $g[ 'round' ] ),
-                        't'   => strtotime( $g[ 'timestamp' ] ),
-                        'opp' => $g[ 'p2_id' ] != null ? [
-                            'name'   => $g[ 'p2_name' ],
-                            /* strip avatar array from end and remove keys for more concise transmission */
-                            'avatar' => array_values( array_slice( $g, -16 ) ),
-                            'score'  => [ $g[ 'p1_score' ], $g[ 'p2_score' ] ]
-                        ] : false
-                    ] );
+                    array_push(
+                        $list,
+                        [
+                            'gid' => shortID::toShort( $g[ 'game_id' ] ),
+                            'p'   => $g[ 'p_index' ],
+                            'se'  => $this->_deserializeLobbySetting( $g[ 'setting' ], $g[ 'p_index' ] == 1 ),
+                            'r'   => $g[ 'round' ] > -1,
+                            'it'  => !!$g[ 'isturn' ] || ( $g[ 'p2_name' ] && -1 == $g[ 'round' ] ),
+                            't'   => strtotime( $g[ 'timestamp' ] ),
+                            'opp' => $g[ 'p2_id' ] != null ? [
+                                'name'   => $g[ 'p2_name' ],
+                                /* strip avatar array from end and remove keys for more concise transmission */
+                                'avatar' => array_values( array_slice( $g, -16 ) ),
+                                'score'  => [ $g[ 'p1_score' ], $g[ 'p2_score' ] ]
+                            ] : false
+                        ]
+                    );
                 }
                 /* create final return object */
                 $response = [ 'l' => $list, 'v' => VERSION ];
@@ -203,17 +206,20 @@ class GameController extends Controller
     {
         $response = false;
         /* filter inputs */
-        $input = filter_var_array( $cmd, [
-            /* validate avatar integer array */
-            'color' => [
-                'filter' => FILTER_VALIDATE_BOOLEAN,
-                'flags'  => FILTER_NULL_ON_FAILURE
-            ],
-            'rank' => [
-                'filter' => FILTER_VALIDATE_BOOLEAN,
-                'flags'  => FILTER_NULL_ON_FAILURE
+        $input = filter_var_array(
+            $cmd,
+            [
+                /* validate avatar integer array */
+                'color' => [
+                    'filter' => FILTER_VALIDATE_BOOLEAN,
+                    'flags'  => FILTER_NULL_ON_FAILURE
+                ],
+                'rank' => [
+                    'filter' => FILTER_VALIDATE_BOOLEAN,
+                    'flags'  => FILTER_NULL_ON_FAILURE
+                ]
             ]
-        ] );
+        );
         if ( $game = $this->_getGame( $this->_filterGid( $cmd[ 'gid' ] ) ) )
         {
             /* check lobby ownership and open status */
@@ -244,20 +250,23 @@ class GameController extends Controller
     {
         $response = [ 'success' => false ];
         /* filter inputs */
-        $input = filter_var_array( $cmd, [
-            /* validate avatar integer array */
-            'st' => [
-                'filter' => FILTER_UNSAFE_RAW,
-                'flags'  => [ FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH ]
-            ],
-            't' => [
-                'filter' => FILTER_VALIDATE_INT
-            ],
-            'v' => [
-                'filter' => FILTER_VALIDATE_INT,
-                'flags'  => FILTER_FORCE_ARRAY
+        $input = filter_var_array(
+            $cmd,
+            [
+                /* validate avatar integer array */
+                'st' => [
+                    'filter' => FILTER_UNSAFE_RAW,
+                    'flags'  => [ FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH ]
+                ],
+                't' => [
+                    'filter' => FILTER_VALIDATE_INT
+                ],
+                'v' => [
+                    'filter' => FILTER_VALIDATE_INT,
+                    'flags'  => FILTER_FORCE_ARRAY
+                ]
             ]
-        ] );
+        );
 
         try
         {
@@ -424,7 +433,7 @@ class GameController extends Controller
                 /* if play stage has not yet been completed */
                 else if ( $this->_model->getGate() < 1 ) { $s = 'play1'; }
                 /* if we haven't continued past count stages */
-                else                                    { $s = 'count1'; }
+                else { $s = 'count1'; }
             }
         }
         return $s;
@@ -745,13 +754,13 @@ class GameController extends Controller
                 && in_array( $h[ 4 ][ 'i' ], $i )
                 && count( array_unique( $s ) ) == 1
                 && ( array_filter( $c, fn( $ca ) => $ca[ 'i' ] != $h[ 4 ][ 'i' ] )[ 0 ][ 'c' ][ 'v' ] == 10 )
-            )                                                           { $nobs[]    = $this->_returnScoreObj( 'nobs'      , $c, $z ); }
+            )                                     { $nobs[]    = $this->_returnScoreObj( 'nobs',     $c, $z ); }
             /* fifteen */
-            if ( array_sum( $p ) == 15                                ) { $fifteen[] = $this->_returnScoreObj( 'fifteen'   , $c, $z ); }
+            if ( array_sum( $p ) == 15          ) { $fifteen[] = $this->_returnScoreObj( 'fifteen',  $c, $z ); }
             /* pair */
-            if ( $n == 2 && $v[ 0 ] == $v[ 1 ]                        ) { $pair[]    = $this->_returnScoreObj( 'pair2'     , $c, $z ); }
+            if ( $n == 2 && $v[ 0 ] == $v[ 1 ]  ) { $pair[]    = $this->_returnScoreObj( 'pair2',    $c, $z ); }
             /* if card run matches */
-            if ( $n >= 3 && $this->_isRun( $v )                       ) { $run[]     = $this->_returnScoreObj( 'run'   . $n, $c, $z ); }
+            if ( $n >= 3 && $this->_isRun( $v ) ) { $run[]     = $this->_returnScoreObj( 'run' . $n, $c, $z ); }
             /* flush if no flush is recorded so far and card suits match */
             if (
                 /* check if we're looking at cards in hand (non crib-hands only), or all 5 */
