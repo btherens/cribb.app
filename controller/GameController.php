@@ -529,8 +529,8 @@ class GameController extends Controller
                 /* return draw result to user - true if win, false if lose, null if no win */
                 'dr' => $dr
             ],
-            /* it is player's turn if draw is still needed or both draws are complete */
-            'it' => ( ( is_null( $ph ) && is_null( $oh ) ) || !is_null( $dr ) ) ? 2 : ( is_null( $ph ) ? 1 : 0 )
+            /* it is both player's turn if draw is still needed from both or neither, and player's turn if draw is blank */
+            'it' => is_null( $ph ) === is_null( $oh ) ? 2 : ( is_null( $ph ) ? 1 : 0 )
         ];
         /* return state object to merge with base response */
         return $response;
@@ -556,7 +556,7 @@ class GameController extends Controller
                 's'  => !is_null( $s ) ? $this->_returnDeckIndexDetail( $s, $d ) : null
             ],
             /* all players turn if both cribs are null, or just player's turn if player's crib is null */
-            'it' => is_null( $ch[ 0 ] ) && is_null( $ch[ 1 ] ) ? 2 : ( is_null( $ch[ 0 ] ) || ( !$g->iscrib && is_null( $s ) ) ? 1 : 0 )
+            'it' => is_null( $ch[ 0 ] ) && is_null( $ch[ 1 ] ) ? 2 : ( is_null( $ch[ 0 ] ) || ( !is_null( $ch[ 1 ] ) && !$g->iscrib && is_null( $s ) ) ? 1 : 0 )
         ];
         /* return state object to merge with base response */
         return $response;

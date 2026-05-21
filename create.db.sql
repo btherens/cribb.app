@@ -409,11 +409,11 @@ CREATE VIEW `vgamedetail` AS
         IF( COALESCE( r.`value`, 0 ) > 0, IF( r.`value` = p1.`p_index`, 0, 1 ), NULL ) AS `iscrib`,
         /* turn detection */
         IF(
-            /* if last change was not from player and not an N */
-            ( a.`identity_id` <> p1.`identity_id` AND NOT ( a.`type` = 'N' AND a.`value` IN ( 0, 1 ) ) )
-            /* if last change was from player but it was an N = 1 */
-         OR ( a.`identity_id` = p1.`identity_id` AND a.`type` = 'N' AND a.`value` = 1 )
-            /* if type is n=2, all players get isturn flag */
+            /* last change was not from player and not an N = 1 */
+            ( a.`identity_id` <> p1.`identity_id` AND NOT ( a.`type` = 'N' AND a.`value` = 1 ) )
+            /* last change was from player but it was an N = 1 */
+         OR ( a.`identity_id` =  p1.`identity_id` AND     ( a.`type` = 'N' AND a.`value` = 1 ) )
+            /* type is n=2, all players get isturn flag */
          OR ( a.`type` = 'N' AND a.`value` = 2 ),
             1, 0
         ) AS `isturn`,
