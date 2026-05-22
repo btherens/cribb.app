@@ -1,9 +1,12 @@
 <?php
 
 /* iterate over all possible combinations of collection for given size
- * foreach( new combination( 'abc', 2 ) as $substring ) { echo( $substring ); }
+ * $stringcombo = new combination( 'abc', 2 );
+ * foreach( $stringcombo as $string ) { echo( $string ); }
  * 'ab'
- * foreach( new combination( [ 'one', 'two', 'three' ], 2 ) as $array ) { echo( $array ); }
+
+ * $arraycombo = new combination( [ 'one', 'two', 'three' ], 2 );
+ * foreach( new combination( $arraycombo as $array ) { echo( $array ); }
  * [ 'one', 'two' ]
  */
 class combination implements Iterator
@@ -97,5 +100,4 @@ class combination implements Iterator
         if ( is_null( $k ) ) $k = $this->k;
         return self::nCr( $n, $k );
     }
-
 }

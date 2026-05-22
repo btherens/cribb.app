@@ -105,7 +105,7 @@ class IdentityController extends Controller
             if ( $this->_challenge() && $this->_model->identity->enabled )
             {
                 $record   = new _GamerecordController( 0, $this->_model->identity->id, null );
-                $response = [ 'name' => $this->_model->getName(), 'stat' => $record->getPlayerRecord()[ 0 ] ];
+                $response = [ 'name' => $this->_model->getName(), 'stat' => ( $record->getPlayerRecord() ?? [ null ] )[ 0 ] ];
             }
         }
         catch ( Exception $e ) { http_response_code( 500 ); } 
@@ -121,7 +121,7 @@ class IdentityController extends Controller
     }
 
     /* create an identity record and return a webauthn attestationoptions object to sign */
-    public function createAttestation( $cmd ): void
+    public function createAttestationChallenge( $cmd ): void
     {
         /* filter inputs */
         $input = filter_var_array( $cmd, [
@@ -242,7 +242,6 @@ class IdentityController extends Controller
                         /* register device and session */
                         $this->_model->createDevice( );
                         $this->_model->createSession( );
-    
                         /* return response */
                         $response = [ 'name' => $this->_model->getName(), 'success' => true ];
                     }

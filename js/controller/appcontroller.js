@@ -690,7 +690,6 @@ export default class AppController extends Controller
                 time = e.data;
             } 
         }
-
     }
 
     /* attach visibilitychange callbacks if necessary */

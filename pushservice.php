@@ -7,5 +7,5 @@
     error_reporting( $e );
 
     /* call push service */
-    $pushobj = new PushController( null );
+    $pushobj = new _PushController( null );
     $pushobj->runPushService();

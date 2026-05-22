@@ -1,8 +1,23 @@
 <?php
 
-/* provide encryption for web push and vapid header generation */
-class encryption
+/*
+ * web push encryption - encrypt messages with request headers
+ * $push    = New cozyPush( $payload, $hostname, $endpoint, $userPublicKey, $userAuthToken, $encoding );
+ * $content = $push->cipherText();
+ * $headers = $push->headers();
+ */
+class cozyPush
 {
+    protected stdclass $_encrypted;
+    protected array    $_headers;
+    public function __construct( string $payload, string $hostname, string $endpoint, string $userPublicKey, string $userAuthToken, string $encoding = 'aesgcm' )
+    {
+        $this->_encrypted = self::encrypt( $payload, $userPublicKey, $userAuthToken, $encoding );
+        $this->_headers   = self::buildHeaders( $this->_encrypted->cipherText, $this->_encrypted->salt, $this->_encrypted->localPublicKey, $hostname, $endpoint, $encoding );
+    }
+    /* object properties */
+    public function cipherText(): string { return $this->_encrypted->cipherText; }
+    public function headers():    array  { return $this->_headers; }
 
     /* encrypt a payload with user key and token */
     public static function encrypt( string $payload, string $userPublicKey, string $userAuthToken, string $encoding = 'aesgcm' ): stdclass
@@ -47,32 +62,32 @@ class encryption
         ];
     }
 
-    /* create a new JWT */
-    public static function buildJWT( string $endpoint ): string
+    /* build headers for a push request */
+    public static function buildHeaders( string $content, string $salt, string $localPublicKey, string $hostname, string $endpoint, string $encoding ): array
     {
-        /* vapid keys */
-        $publickey    = Base64URL::decode( self::vapidPublic() );
-        $privatekey   = Base64URL::decode( self::vapidPrivate() );
-        /* JWTInfo */
-        $info         = [ 'typ' => 'JWT', 'alg' => 'ES256' ];
-        $info_encoded = Base64URL::encode( json_encode( $info ) );
-        /* JWTData */
-        $data         = [
-            /* endpoint origin */
-            'aud' => 'https://' . parse_url( $endpoint )[ 'host' ],
-            /* 12 hours */
-            'exp' => time() + 43200,
-            /* subscription info */
-            'sub' => 'https://' . self::$_vapidHostname
+        /* basic headers */
+        $headers = [
+            'Content-Type'     => 'application/octet-stream',
+            'TTL'              => 2419200,
+            'Content-Encoding' => $encoding,
+            'Content-Length'   => (string) mb_strlen( $content, '8bit' )
         ];
-        $data_encoded = Base64URL::encode( json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK ) );
-        /* build signature */
-        $pem          = self::_convertPrivateKeyToPEM( self::_createKeyObject( self::_unserializePublicKey( $publickey ), $privatekey ) );
-        /* sign first two encoded strings in token */
-        if ( openssl_sign( "$info_encoded.$data_encoded", $der, $pem, 'sha256' ) ) { $signature = self::_signatureFromDER( $der ); } else { throw new Exception(); }
-        $signature_encoded = Base64URL::encode( $signature );
-        /* build and return the token */
-        return "$info_encoded.$data_encoded.$signature_encoded";
+        /* create jwt using server-side vapid keys */
+        $jwt = self::buildJWT( $hostname, $endpoint );
+        /* unique encoding headers */
+        if ( 'aesgcm' === $encoding )
+        {
+            $headers[ 'Authorization' ] = 'WebPush '   . $jwt;
+            $headers[ 'Crypto-Key' ]    = 'dh='        . Base64URL::encode( $localPublicKey ) . ';'
+                                        . 'p256ecdsa=' . self::vapidPublic();
+            $headers[ 'Encryption' ]    = 'salt='      . Base64URL::encode( $salt );
+        }
+        elseif ( 'aes128gcm' === $encoding )
+        {
+            $headers[ 'Authorization' ] = 'vapid t=' . $jwt . ', k=' . self::vapidPublic();
+        }
+        else   { throw new Exception( 'content encoding not supported' ); }
+        return $headers;
     }
 
     /* vapid public key */
@@ -93,8 +108,33 @@ class encryption
         return self::$_vapidPrivate;
     }
 
-    /* url to use in vapid headers */
-    private static string $_vapidHostname = BASEDNS;
+    /* create a new JWT */
+    public static function buildJWT( string $hostname, string $endpoint ): string
+    {
+        /* vapid keys */
+        $publickey    = Base64URL::decode( self::vapidPublic() );
+        $privatekey   = Base64URL::decode( self::vapidPrivate() );
+        /* JWTInfo */
+        $info         = [ 'typ' => 'JWT', 'alg' => 'ES256' ];
+        $info_encoded = Base64URL::encode( json_encode( $info ) );
+        /* JWTData */
+        $data         = [
+            /* endpoint origin */
+            'aud' => 'https://' . parse_url( $endpoint )[ 'host' ],
+            /* 12 hours */
+            'exp' => time() + 43200,
+            /* subscription info */
+            'sub' => 'https://' . $hostname
+        ];
+        $data_encoded = Base64URL::encode( json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK ) );
+        /* build signature */
+        $pem          = self::_convertPrivateKeyToPEM( self::_createKeyObject( self::_unserializePublicKey( $publickey ), $privatekey ) );
+        /* sign first two encoded strings in token */
+        if ( openssl_sign( "$info_encoded.$data_encoded", $der, $pem, 'sha256' ) ) { $signature = self::_signatureFromDER( $der ); } else { throw new Exception(); }
+        $signature_encoded = Base64URL::encode( $signature );
+        /* build and return the token */
+        return "$info_encoded.$data_encoded.$signature_encoded";
+    }
 
     /* length to pad payload to */
     private static int $_padlength = 255;
@@ -126,10 +166,9 @@ class encryption
         /* unpack data and determine length */
         $data       = mb_substr( bin2hex( $data ), 2, null, '8bit' );
         $dataLength = mb_strlen( $data, '8bit' );
+        /* [ x, y ] */
         return [
-            /* x */
             hex2bin( mb_substr( $data,    0, $dataLength / 2, '8bit' ) ),
-            /* y */
             hex2bin( mb_substr( $data, $dataLength / 2, null, '8bit' ) ),
         ];
     }
@@ -145,13 +184,10 @@ class encryption
         }
         else
         {
-            $details = openssl_pkey_get_details( openssl_pkey_new( [
-                'curve_name'       => 'prime256v1',
-                'private_key_type' => OPENSSL_KEYTYPE_EC,
-            ] ) );
-            $x = str_pad( $details[ 'ec' ][ 'x' ], 32, chr( 0 ), STR_PAD_LEFT );
-            $y = str_pad( $details[ 'ec' ][ 'y' ], 32, chr( 0 ), STR_PAD_LEFT );
-            $d = str_pad( $details[ 'ec' ][ 'd' ], 32, chr( 0 ), STR_PAD_LEFT );
+            $details = openssl_pkey_get_details( openssl_pkey_new( [ 'curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC ] ) );
+            $x       = str_pad( $details[ 'ec' ][ 'x' ], 32, chr( 0 ), STR_PAD_LEFT );
+            $y       = str_pad( $details[ 'ec' ][ 'y' ], 32, chr( 0 ), STR_PAD_LEFT );
+            $d       = str_pad( $details[ 'ec' ][ 'd' ], 32, chr( 0 ), STR_PAD_LEFT );
         }
         /* return key object with urlsafe encoded strings */
         return (object) [
@@ -167,9 +203,7 @@ class encryption
 
     private static function _getKey( $x, $y, $length = 32 ): string
     {
-        return "\04"
-            . str_pad( Base64URL::decode( $x ), $length, "\0", STR_PAD_LEFT )
-            . str_pad( Base64URL::decode( $y ), $length, "\0", STR_PAD_LEFT );
+        return "\04" . str_pad( Base64URL::decode( $x ), $length, "\0", STR_PAD_LEFT ) . str_pad( Base64URL::decode( $y ), $length, "\0", STR_PAD_LEFT );
     }
 
     /* convert json web key to public key pem */
@@ -223,7 +257,6 @@ class encryption
         if     ( 'aesgcm'    === $encoding ) { $info = 'Content-Encoding: auth' . chr( 0 ); }
         elseif ( 'aes128gcm' === $encoding ) { $info = 'WebPush: info' . chr( 0 ) . $userPublicKey . $localPublicKey; }
         else   { throw new Exception( 'content encoding not supported' ); }
-
         return self::_hkdf( $sharedSecret, $userAuthToken, $info, 32 );
     }
 
@@ -268,10 +301,8 @@ class encryption
         if ( '30' === mb_substr( $hex, 0, 2, '8bit' ) )
         {
             /* sequence types */
-            /* handling for 128+ */
             if   ( '81' === mb_substr( $hex, 2, 2, '8bit' ) ) { $hex = mb_substr( $hex, 6, null, '8bit' ); }
             else { $hex = mb_substr( $hex, 4, null, '8bit' ); }
-
             if   ( '02' === mb_substr( $hex, 0, 2, '8bit' ) )
             {
                 $Rl  = (int) hexdec( mb_substr( $hex, 2, 2, '8bit' ) );
@@ -291,11 +322,16 @@ class encryption
     /* remove hex padding */
     private static function _retrievePosInt( string $data ) : string
     {
-        while ( '00' === mb_substr( $data, 0, 2, '8bit' ) && '7f' < mb_substr( $data, 2, 2, '8bit' ) )
-        {
-            $data = mb_substr( $data, 2, null, '8bit' );
-        }
+        while ( '00' === mb_substr( $data, 0, 2, '8bit' ) && '7f' < mb_substr( $data, 2, 2, '8bit' ) ) { $data = mb_substr( $data, 2, null, '8bit' ); }
         return $data;
     }
+}
 
+/* simple encode / decode */
+class Base64URL
+{
+    /* encode string in trimmed base64url */
+    public static function encode( string $string ): string { return rtrim( strtr( base64_encode( $string ), '+/', '-_' ), '=' ); }
+    /* decode a base64url-encoded string */
+    public static function decode( string $b64url ): string { return base64_decode( strtr( $b64url, '-_', '+/' ), true ); }
 }

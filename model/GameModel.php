@@ -179,8 +179,9 @@ class GameModel extends Model
     {
         /* use current round by default */
         if ( is_null( $round ) ) { $round = $this->game->round; }
-        /* generate values collection for insert based on array length */
-        $values = ''; foreach ( $deck as $card ) { $values = $values ? ( $values . ', ( ? )' ) : 'VALUES ( ? )'; }
+        /* create select input array */
+        $vstr = 'SELECT ?';
+        $vstr .= str_repeat( ' UNION ALL ' . $vstr, max( 0, count( $deck ) - 1 ) );
         /* insert deck order values into table */
         $this->run(
             'INSERT INTO `game_activity` ( `game_id`, `identity_id`, `round`, `type`, `value` )
@@ -194,8 +195,8 @@ class GameModel extends Model
             SELECT
                 dtl.*,
                 v.*
-            FROM ( ' . $values . ' ) v
-            INNER JOIN dtl ON 1 = 1',
+            FROM ( ' . $vstr . ' ) v
+            CROSS JOIN dtl',
             [ ...[
                 $this->game->game_id,
                 $this->identity,
@@ -444,12 +445,14 @@ class GameModel extends Model
     /* get this round's play order
      * return array is in this format:
      * [
-     *     [ ...player cards thrown ],
-     *     [ ...opponent cards thrown ],
-     *     [ ...allcards in order ],
-     *     [ ...allcards discard ],
-     *     true / false if its player's turn
-     *     true / false if other player said go
+     *     [
+     *         [ ...player cards thrown ],
+     *         player go count
+     *     ],
+     *     [
+     *         [ ...opponent cards thrown ],
+     *         opponent go count
+     *     ]
      * ]
      */
     public function getPlay(): ?array
@@ -550,13 +553,17 @@ class GameModel extends Model
      * S: game settings value - 0-3
      * Z: a link to the next game in series
      * I: ignore this game in lists if I key is most recent record player made
+     * K: notify opponent
+         * 0 - your turn!
+         * n - that it is their turn
+         * 2 - game has ended
 
      * basic game moves
      * R: initiate a new round - value defines whose crib it is
      * Q: confirm after some points in play
-         * Q1 - continue after play round
-         * Q2 - continue after player 1 count
-         * Q3 - continue after player 2 count
+         * 1 - continue after play round
+         * 2 - continue after player 1 count
+         * 3 - continue after player 2 count
      * M: id of a findScore
      * N: empty record - used to set isturn flag
          * 0 - set isturn flag for no players
@@ -591,12 +598,12 @@ class GameModel extends Model
         /* basic query parameters - every row gets these */
         $p = [ $g->game_id, $identity, $round, $type ];
         /* a single value in rows */
-        $vstr = '( ? )';
+        $vstr = 'SELECT ?';
         /* adjust sql string length to match dimensions */
         if ( is_iterable( $value ) )
         {
             /* repeat the value string for each value being added */
-            $vstr .= str_repeat( ',' . $vstr, max( 0, count( $value ) - 1 ) );
+            $vstr .= str_repeat( ' UNION ALL ' . $vstr, max( 0, count( $value ) - 1 ) );
             /* append the value string to parameters */
             $p = array_merge( $p, $value );
         }
@@ -608,7 +615,7 @@ class GameModel extends Model
             'INSERT INTO `game_activity` ( `game_id`, `identity_id`, `round`, `type`, `value` )
             SELECT c.*, v.*
             FROM ( SELECT ? AS a, ? AS b, ? AS c, ? AS d ) c
-            JOIN ( VALUES ' . $vstr . '  ) v ON 1 = 1',
+            CROSS JOIN ( ' . $vstr . ' ) v',
             $p
         );
     }

@@ -4,15 +4,11 @@
     <title><?php echo $title ?></title>
     <meta property="og:title" content="<?php echo $title ?>">
     <meta property="og:type" content="game">
-    <?php if ( !preg_match( '/^(?=.*facebot)(?=.*twitterbot).*$/i', $_SERVER[ 'HTTP_USER_AGENT' ] ) ) { ?>
-        <meta property="og:image" content="/asset/board-icon@512x.png?vers=<?php echo VERSION; ?>" />
-    <?php } ?>
+    <meta property="og:image" content="/asset/board-icon@512x.png?vers=<?php echo VERSION; ?>" />
     <link rel="manifest" href="/webmanifest?vers=<?php echo VERSION; ?>" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="rgb(239, 182, 91)" />
-    <link rel="icon" href="/asset/board-icon@180x.png?vers=<?php echo VERSION; ?>" />
-    <link rel="shortcut icon" href="/asset/board-icon@180x.png?vers=<?php echo VERSION; ?>" />
-    <link rel="apple-touch-icon" href="/asset/board-icon@180x.png?vers=<?php echo VERSION; ?>" sizes="180x180" />
+    <link rel="icon" href="/asset/board-icon@512x.png?vers=<?php echo VERSION; ?>" />
+    <link rel="shortcut icon" href="/asset/board-icon@512x.png?vers=<?php echo VERSION; ?>" />
     <script type="module" src="/js/app.js?vers=<?php echo VERSION; ?>" ></script>
     <script>
         let env = {
@@ -22,7 +18,7 @@
             author: '<?php echo SOURCEAUTHOR; ?>',
             changelog: <?php echo CHANGELOG; ?>,
             version: '<?php echo VERSION; ?>',
-            vapidkey: '<?php echo encryption::vapidPublic(); ?>'
+            vapidkey: '<?php echo cozyPush::vapidPublic(); ?>'
         };
     </script>
     <style><?php

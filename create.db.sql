@@ -82,6 +82,7 @@ DROP TABLE IF EXISTS `game_result`;
 DROP TABLE IF EXISTS `game_activity`;
 DROP TABLE IF EXISTS `game`;
 
+DROP TABLE IF EXISTS `fidokey`;
 DROP TABLE IF EXISTS `pushsubscription`;
 DROP TABLE IF EXISTS `session`;
 DROP TABLE IF EXISTS `device`;
@@ -97,29 +98,38 @@ CREATE TABLE `params` (
     CONSTRAINT   `paramsUC_key` UNIQUE ( `key` )
 );
 /* populate params */
-INSERT INTO `params` ( `key`, `value` ) VALUES ( 'pushtimestamp', '' );
+INSERT INTO `params` ( `key`, `value` ) SELECT 'pushtimestamp', '';
 
 /* user identities */
 CREATE TABLE `identity` (
-    `id`         int(11)      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `id_ext`     binary(16)   NOT NULL,
-    `credId`     binary(20)   NULL,
-    `credKey`    varchar(255) NULL,
-    `enabled`    tinyint(1)   NOT NULL DEFAULT 0,
-    `timestamp`  timestamp    NOT NULL DEFAULT current_timestamp(),
-    CONSTRAINT   `identityUC_idext` UNIQUE ( `id_ext` )
+    `id`        int(11)            NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `id_ext`    binary(16)         NOT NULL,
+    `enabled`   tinyint(1)         NOT NULL DEFAULT 0,
+    `timestamp` timestamp          NOT NULL DEFAULT current_timestamp(),
+    CONSTRAINT  `identityUC_idext` UNIQUE ( `id_ext` )
 );
 
+/* passkey storage */
+CREATE TABLE `fidokey` (
+    `id`          int(11)                NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    /* link login factor to an identity */
+    `identity_id` int(11)                NOT NULL,
+    `credId`      binary(20)             NOT NULL,
+    `credKey`     varchar(255)           NOT NULL,
+    `timestamp`   timestamp              NOT NULL DEFAULT current_timestamp(),
+    CONSTRAINT    `fidokeyFK_identityid` FOREIGN KEY ( `identity_id` ) REFERENCES `identity` ( `id` ) ON DELETE CASCADE,
+    CONSTRAINT    `fidokeyUC_credId`     UNIQUE      ( `credId` ),
+    CONSTRAINT    `fidokeyUC_identityid` UNIQUE      ( `identity_id` )
+);
 
 /* authenticated devices */
-CREATE TABLE `device`
-(
-    `id`             int(11)      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `identity_id`    int(11)      NOT NULL,
-    `selector`       varchar(255) NOT NULL,
-    `validator_hash` varchar(255) NOT NULL,
-    `expiry`         datetime     NOT NULL,
-    `timestamp`      timestamp    NOT NULL DEFAULT current_timestamp(),
+CREATE TABLE `device` (
+    `id`             int(11)               NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `identity_id`    int(11)               NOT NULL,
+    `selector`       varchar(255)          NOT NULL,
+    `validator_hash` varchar(255)          NOT NULL,
+    `expiry`         datetime              NOT NULL,
+    `timestamp`      timestamp             NOT NULL DEFAULT current_timestamp(),
     CONSTRAINT       `deviceFK_identityid` FOREIGN KEY ( `identity_id` ) REFERENCES `identity` ( `id` ) ON DELETE CASCADE,
     CONSTRAINT       `deviceUC_selector`   UNIQUE      ( `selector` )
 );
@@ -134,7 +144,6 @@ CREATE TABLE `session` (
     UNIQUE KEY   `session_id` ( `session_id` ),
     CONSTRAINT   `sessionFK_deviceid` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE
 );
-
 
 /* store avatar data here */
 CREATE TABLE `avatar` (
@@ -233,68 +242,68 @@ ON `game_activity` FOR EACH ROW
 
 /* returns the current avatar for an identity */
 CREATE VIEW `vavatar` AS
-    WITH rank AS (
+    WITH pcte AS (
         SELECT a.*, ROW_NUMBER() OVER ( PARTITION BY `identity_id` ORDER BY `timestamp` DESC, `id` DESC  ) AS `r`
         FROM `avatar` a
     )
-    SELECT * FROM rank WHERE `r` = 1;
+    SELECT * FROM pcte WHERE `r` = 1;
 
 /* returns the current name for an identity */
 CREATE VIEW `vname` AS
-    WITH rank AS (
+    WITH pcte AS (
         SELECT n.*, ROW_NUMBER() OVER ( PARTITION BY `identity_id` ORDER BY `timestamp` DESC, `id` DESC  ) AS `r`
         FROM `name` n
     )
-    SELECT * FROM rank WHERE `r` = 1;
+    SELECT * FROM pcte WHERE `r` = 1;
 
 /* latest records of each type */
 CREATE VIEW `vgame_activity_latest` AS
-    WITH ranked AS (
+    WITH pcte AS (
         SELECT
             ga.*,
             ROW_NUMBER() OVER ( PARTITION BY `game_id`, `identity_id`, `type` ORDER BY `timestamp` DESC, `id` DESC ) AS rn
         FROM `game_activity` ga
     )
-    SELECT * FROM ranked WHERE rn = 1;
+    SELECT * FROM pcte WHERE rn = 1;
 
 /* latest records of each type in each round */
 CREATE VIEW `vgame_activity_round_latest` AS
-    WITH ranked AS (
+    WITH pcte AS (
         SELECT
             ga.*,
             ROW_NUMBER() OVER ( PARTITION BY `game_id`, `identity_id`, `round`, `type` ORDER BY `timestamp` DESC, `id` DESC ) AS rn
         FROM `game_activity` ga
     )
-    SELECT * FROM ranked WHERE rn = 1;
+    SELECT * FROM pcte WHERE rn = 1;
 
 /* # of records of each type */
 CREATE VIEW `vgame_activity_count` AS
     SELECT
-        ga.*,
+        `game_id`, `identity_id`, `type`,
         COUNT( * ) as `count`
-    FROM `game_activity` ga
+    FROM `game_activity`
     GROUP BY `game_id`, `identity_id`, `type`;
 
 CREATE VIEW `vgame_activity_round_count` AS
     SELECT
-        ga.*,
+        `game_id`, `identity_id`, `round`, `type`,
         COUNT( * ) as `count`
-    FROM `game_activity` ga
+    FROM `game_activity`
     GROUP BY `game_id`, `identity_id`, `round`, `type`;
 
 /* the sum of each type */
 CREATE VIEW `vgame_activity_sum` AS
     SELECT
-        ga.*,
+        `game_id`, `identity_id`, `type`,
         SUM( `value` ) as `sum`
-    FROM `game_activity` ga
+    FROM `game_activity`
     GROUP BY `game_id`, `identity_id`, `type`;
 
 CREATE VIEW `vgame_activity_round_sum` AS
     SELECT
-        ga.*,
+        `game_id`, `identity_id`, `round`, `type`,
         SUM( `value` ) as `sum`
-    FROM `game_activity` ga
+    FROM `game_activity`
     GROUP BY `game_id`, `identity_id`, `round`, `type`;
 
 /* return records that are more recent than other player's most recent record */
@@ -379,9 +388,9 @@ CREATE VIEW `vgamedetail` AS
             gl.`identity_id`,
             gl.`r` AS `p_index`,
             /* score cannot exceed 121 */
-            CAST( least( 121, sc.`sum` ) AS int ) AS `score`,
+            CAST( least( 121, sc.`sum` ) AS unsigned ) AS `score`,
             /* last points limited by max score */
-            CAST( s.`value` + least( 0, 121 - sc.`sum` ) AS int ) AS `points`
+            CAST( s.`value` + least( 0, 121 - sc.`sum` ) AS unsigned ) AS `points`
         FROM gamelink gl
         LEFT JOIN scores sc ON sc.`game_id` = gl.`game_id` AND gl.`identity_id` = sc.`identity_id`
         LEFT JOIN score  s  ON  s.`game_id` = gl.`game_id` AND gl.`identity_id` = s.`identity_id`
@@ -400,11 +409,11 @@ CREATE VIEW `vgamedetail` AS
         IF( COALESCE( r.`value`, 0 ) > 0, IF( r.`value` = p1.`p_index`, 0, 1 ), NULL ) AS `iscrib`,
         /* turn detection */
         IF(
-            /* if last change was not from player and not an N */
-            ( a.`identity_id` <> p1.`identity_id` AND NOT ( a.`type` = 'N' AND a.`value` IN ( 0, 1 ) ) )
-            /* if last change was from player but it was an N = 1 */
-         OR ( a.`identity_id` = p1.`identity_id` AND a.`type` = 'N' AND a.`value` = 1 )
-            /* if type is n=2, all players get isturn flag */
+            /* last change was not from player and not an N = 1 */
+            ( a.`identity_id` <> p1.`identity_id` AND NOT ( a.`type` = 'N' AND a.`value` = 1 ) )
+            /* last change was from player but it was an N = 1 */
+         OR ( a.`identity_id` =  p1.`identity_id` AND     ( a.`type` = 'N' AND a.`value` = 1 ) )
+            /* type is n=2, all players get isturn flag */
          OR ( a.`type` = 'N' AND a.`value` = 2 ),
             1, 0
         ) AS `isturn`,
@@ -520,13 +529,13 @@ CREATE VIEW `vtimestamp` AS
 
 /* a view of session that trims all but most recent session for a given device */
 CREATE VIEW `vsession` AS
-    WITH ranked AS (
+    WITH pcte AS (
         SELECT
             s.*,
             ROW_NUMBER() OVER ( PARTITION BY `device_id` ORDER BY `timestamp` DESC, `id` DESC ) AS rn
         FROM `session` s
     )
-    SELECT * FROM ranked WHERE rn = 1;
+    SELECT * FROM pcte WHERE rn = 1;
 
 /* ordered view of push subscriptions */
 CREATE VIEW `vpushsubscription` AS
@@ -581,7 +590,7 @@ BEGIN
     SELECT  `timestamp` INTO oldtimestamp FROM `params` WHERE `key` = 'pushtimestamp';
     /* set new timestamp to model */
     UPDATE  `params`    SET  `timestamp` = newtimestamp WHERE `key` = 'pushtimestamp';
-    /* return previous timestamp up to a maximum of 10 minutes */
+    /* return previous timestamp */
     RETURN oldtimestamp;
 END$$
 
@@ -596,20 +605,20 @@ BEGIN
     /* defaults */
     /* newtimestamp: now */
     SET newtimestamp = IFNULL( newtimestamp, now() );
-    /* oldtimestamp: last run from model */
+    /* oldtimestamp: last run from model up to a max of 10 minutes ago */
     SET oldtimestamp = IFNULL( oldtimestamp, GREATEST( `setPushTimestamp`( newtimestamp ), newtimestamp - INTERVAL 10 MINUTE ) );
 
     /* return list of push notifications with subscription info */
     WITH
         badges AS (
-            SELECT `p1_id`, SUM( `isturn` ) AS `badge` FROM `vgamedetail` GROUP BY `p1_id`
+            SELECT `p1_id`, SUM( `isturn` ) AS `badge` FROM `vgamedetail` WHERE 0 < `round` GROUP BY `p1_id`
         ),
         updates AS (
             SELECT `game_id`, `p1_id`, `p2_name`, `timestamp`
             FROM   `vgamedetail`
             WHERE  1 = `isnew` AND 1 = `isturn` AND `timestamp` BETWEEN oldtimestamp AND newtimestamp
         )
-    SELECT u.*, p.`id`, p.`endpoint`, p.`key`, p.`token`, b.`badge`, 'aesgcm' AS `encoding`
+    SELECT u.*, p.`id`, p.`endpoint`, p.`key`, p.`token`, b.`badge`, 'aes128gcm' AS `encoding`
     FROM   updates u
     JOIN   `vpushsubscription` p ON p.`identity_id` = u.`p1_id`
     JOIN   badges b ON b.`p1_id` = u.`p1_id`
@@ -620,9 +629,9 @@ DELIMITER ;
 
 /* blocked words in user strings */
 CREATE TABLE `blockwords` (
-    `id`          int(11)      NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `word`        varchar(50)  NOT NULL
+    `id`          int(11)     NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `word`        varchar(50) NOT NULL
 );
 
 /* supply a word list to block */
--- INSERT INTO `blockwords` ( `word` ) VALUES ( 'badword1' ), ...;
+-- INSERT INTO `blockwords` ( `word` ) SELECT 'badword1' UNION ALL ...;
